@@ -515,41 +515,45 @@ document.addEventListener("keyup", function(e){
   }
 });
 
-// ---- Export + online submission (DataPipe/OSF, same mechanism as survey/) ----
-// Leave DATAPIPE_ID empty to run in pilot mode (participants get a manual
-// download button instead) - same convention as survey/js/config.js.
-var DATAPIPE_ID = "";
+// ---- Export + online submission ----
+// Google Sheets + Apps Script Web App (google_apps_script_code.gs in this
+// folder), not OSF/DataPipe - DataPipe announced on 2026-11-09 that its OSF
+// backend is shutting down 2026-11-16, which overlaps this study's actual
+// data-collection window, so OSF was dropped before any real data went
+// through it. Leave GAS_URL empty to run in pilot mode (participants get a
+// manual CSV download instead of an automatic submit).
+var GAS_URL = "https://script.google.com/macros/s/AKfycbwOGe0H54xyPRZeY_-gCE3Xl0nL2UOFM1b1wZTOsAq9R4mWKdE24cDDQHc3KixjAdMTgA/exec";
 
-function buildComparisonsCsv(){
-  var cols = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","rt_ms","hold_ms","ts"];
-  var lines = [cols.join(",")];
-  results.forEach(function(r){ lines.push(cols.map(function(c){ return r[c]; }).join(",")); });
-  return lines.join("\n");
-}
-function buildRankingCsv(){
+var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","rt_ms","hold_ms","ts"];
+var RANKING_COLS = ["pid","group","cond","age","gender","pet","hearing","rank","id","dur","pitch","contour"];
+
+function rankingRows(){
   var demo = loadDemo() || {};
-  var cols = ["pid","group","cond","age","gender","pet","hearing","rank","id","dur","pitch","contour"];
-  var lines = [cols.join(",")];
-  (finalRanking || []).forEach(function(r){
-    var row = { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, hearing: demo.hearing, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
-    lines.push(cols.map(function(c){ return row[c]; }).join(","));
+  return (finalRanking || []).map(function(r){
+    return { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, hearing: demo.hearing, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
   });
+}
+function toCsv(cols, rows){
+  var lines = [cols.join(",")];
+  rows.forEach(function(r){ lines.push(cols.map(function(c){ return r[c]; }).join(",")); });
   return lines.join("\n");
 }
-async function submitToDataPipe(filename, data){
-  if (!DATAPIPE_ID) return false;
+
+// Apps Script Web Apps mishandle a CORS preflight, so the request is sent as
+// Content-Type: text/plain (a "simple request", no preflight) and the JSON
+// string is parsed server-side in doPost - the standard workaround for this.
+async function submitToSheet(sheetName, cols, rows){
+  if (!GAS_URL || !rows.length) return false;
   try{
-    var res = await fetch("https://pipe.jspsych.org/api/data/", {
+    var res = await fetch(GAS_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ experimentID: DATAPIPE_ID, filename: filename, data: data })
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ sheet: sheetName, columns: cols, rows: rows })
     });
     return res.ok;
   } catch(e){ return false; }
 }
 async function exportCsv(csv, fname){
-  var sent = await submitToDataPipe(fname, csv);
-  if (sent) return true;
   try{
     var downloads = await window.claude?.use?.("downloads");
     if (downloads){ await downloads.save({ filename: fname, data: csv }); return true; }
@@ -557,16 +561,18 @@ async function exportCsv(csv, fname){
   try{ await navigator.clipboard.writeText(csv); } catch(e){}
   return false;
 }
-document.getElementById("btnExport").addEventListener("click", function(){ exportCsv(buildComparisonsCsv(), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
-document.getElementById("btnExportRanking").addEventListener("click", function(){ exportCsv(buildRankingCsv(), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+document.getElementById("btnExport").addEventListener("click", function(){ exportCsv(toCsv(COMPARISON_COLS, results), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+document.getElementById("btnExportRanking").addEventListener("click", function(){ exportCsv(toCsv(RANKING_COLS, rankingRows()), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
 
-// Auto-submit on completion if DataPipe is configured.
+// Auto-submit on completion if the Apps Script Web App URL is configured;
+// falls back to nothing silently if GAS_URL is empty (pilot mode) - the
+// manual export buttons above still work either way.
 var origFinish = finishStudy;
 finishStudy = function(){
   origFinish();
-  if (DATAPIPE_ID){
-    exportCsv(buildComparisonsCsv(), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv");
-    exportCsv(buildRankingCsv(), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv");
+  if (GAS_URL){
+    submitToSheet("comparisons", COMPARISON_COLS, results);
+    submitToSheet("ranking", RANKING_COLS, rankingRows());
   }
 };
 
