@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Weak-Robot Sound Ranking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF8F3; --card:#FFFFFF; --ink:#1F2A3A; --muted:#6B7686; --border:#E4DFD6;
+  --accent:#A14B3C; --f:#2E6B8A; --j:#A1663C; --ok:#2E8B57;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181D; --card:#1E2228; --ink:#E8E6E1; --muted:#9AA3AE; --border:#2E333B;
+    --accent:#E08A6E; --f:#6FB4DC; --j:#DCA373; --ok:#5FC98A; color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","Noto Sans JP","IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+.wrap{max-width:720px;margin:0 auto;padding-block:26px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topbar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+h1{font-family:"EB Garamond",Georgia,serif;font-size:25px;font-weight:600;margin:0}
+.langbtn{background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:12.5px;font-weight:600;border-radius:999px;padding:6px 14px;cursor:pointer;font-family:inherit}
+p.lede{color:var(--muted);font-size:14.5px;margin:6px 0 20px;max-width:62ch}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.warn{background:color-mix(in srgb, var(--accent) 12%, var(--card));border:1px solid var(--accent);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:16px}
+.demo-row{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.demo-row label{flex:0 0 170px;font-size:13.5px;color:var(--muted)}
+.demo-sel{flex:1;min-width:160px;background:var(--card);border:1px solid var(--border);color:var(--ink);font-size:14px;border-radius:10px;padding:8px 10px;font-family:inherit}
+.progress-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+.bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.bar-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .2s}
+.scenario{font-size:13.5px;color:var(--muted);font-style:italic;margin-bottom:4px}
+.question{font-size:18px;font-weight:600;text-align:center;margin:10px 0 20px}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.slot{border:2px solid var(--border);border-radius:16px;padding:22px 10px;text-align:center;transition:border-color .15s,background .15s}
+.slot.playing{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--card))}
+.slot .key{font-family:"EB Garamond",Georgia,serif;font-size:40px;font-weight:600;line-height:1}
+.slot.f .key{color:var(--f)}
+.slot.j .key{color:var(--j)}
+.slot .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.slot.chosen{background:color-mix(in srgb, var(--ok) 14%, var(--card));border-color:var(--ok)}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+button.ctl{background:var(--card);border:1px solid var(--border);color:var(--ink);font-size:14px;font-weight:600;border-radius:10px;padding:10px 18px;cursor:pointer;font-family:inherit}
+button.ctl.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.ctl:disabled{opacity:.4;cursor:not-allowed}
+.hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px}
+.done{text-align:center;padding:30px 10px}
+.done h2{font-size:22px;margin:0 0 8px}
+.footnote{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1 id="hTitle">หุ่นยนต์อ่อนแอ — จัดอันดับเสียง</h1>
+    <button class="langbtn" id="langToggle">EN</button>
+  </div>
+  <p class="lede" id="pLede">เปรียบเทียบเสียงทีละคู่ ฟัง F (ซ้าย) แล้ว J (ขวา) แล้วเลือกเสียงที่ทำให้คุณ "อยากเข้าไปช่วย" มากกว่า ไม่เก็บชื่อ อีเมล หรือสัญชาติ</p>
+
+  <p id="groupWarn" class="warn" style="display:none"></p>
+  <p id="audioError" class="hint" style="display:none;color:var(--accent);font-weight:600"></p>
+
+  <div class="card" id="demoCard">
+    <div class="scenario" id="demoTitle">ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)</div>
+    <div class="demo-row">
+      <label id="lblAge">ช่วงอายุ</label>
+      <select class="demo-sel" id="demoAge">
+        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
+        <option value="18-29">18–29</option>
+        <option value="30-39">30–39</option>
+        <option value="40-49">40–49</option>
+        <option value="50-64">50–64</option>
+        <option value="65+">65+</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label id="lblGender">เพศ</label>
+      <select class="demo-sel" id="demoGender">
+        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
+        <option value="f" data-th="หญิง" data-en="Female" data-ja="女性">หญิง</option>
+        <option value="m" data-th="ชาย" data-en="Male" data-ja="男性">ชาย</option>
+        <option value="o" data-th="อื่นๆ" data-en="Other" data-ja="その他">อื่นๆ</option>
+        <option value="na" data-th="ไม่ระบุ" data-en="Prefer not to say" data-ja="回答しない">ไม่ระบุ</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label id="lblPet">เคยเลี้ยงสัตว์มั้ย</label>
+      <select class="demo-sel" id="demoPet">
+        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
+        <option value="none" data-th="ไม่เคย" data-en="None" data-ja="なし">ไม่เคย</option>
+        <option value="dog" data-th="สุนัข" data-en="Dog" data-ja="犬">สุนัข</option>
+        <option value="cat" data-th="แมว" data-en="Cat" data-ja="猫">แมว</option>
+        <option value="small" data-th="สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)" data-en="Small animal (rabbit, guinea pig, hamster…)" data-ja="小動物（ウサギ、モルモット、ハムスターなど）">สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)</option>
+        <option value="other" data-th="อื่นๆ" data-en="Other" data-ja="その他">อื่นๆ</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label id="lblHearing">มีปัญหาการได้ยินที่ทราบมั้ย</label>
+      <select class="demo-sel" id="demoHearing">
+        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
+        <option value="no" data-th="ไม่มี" data-en="No" data-ja="いいえ">ไม่มี</option>
+        <option value="yes" data-th="มี" data-en="Yes" data-ja="あり">มี</option>
+      </select>
+    </div>
+    <div class="controls">
+      <button class="ctl primary" id="btnDemoContinue">เริ่มทำแบบทดสอบ</button>
+    </div>
+    <p class="hint" id="demoHint">เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้</p>
+  </div>
+
+  <div id="mainArea" style="display:none">
+    <div class="card" id="pairCard">
+      <div class="scenario" id="pScenario">สถานการณ์: หุ่นยนต์ทำงานต่อไม่ได้ และกำลังร้องเรียกคุณอยู่</div>
+      <div class="question" id="pQuestion">เสียงไหนทำให้คุณ "อยากเข้าไปช่วย" มากกว่ากัน?</div>
+
+      <div class="progress-row">
+        <span><span id="progressCount">0</span> / <span id="progressTotal">~69</span> <span id="progressUnit">คู่ (โดยประมาณ)</span></span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+
+      <div class="stage">
+        <div class="slot f" id="slotLeft">
+          <div class="key">F</div>
+          <div class="sub" id="subLeft">ซ้าย</div>
+        </div>
+        <div class="slot j" id="slotRight">
+          <div class="key">J</div>
+          <div class="sub" id="subRight">ขวา</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="ctl primary" id="btnStart">เริ่ม / เล่นคู่นี้</button>
+        <button class="ctl" id="btnReplay" disabled>เล่นซ้ำ (Space)</button>
+      </div>
+      <p class="hint" id="pHint">กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น</p>
+    </div>
+
+    <div class="card" id="doneCard" style="display:none">
+      <div class="done">
+        <h2 id="doneTitle">เสร็จสิ้นแล้ว — ขอบคุณ</h2>
+        <p class="hint" id="doneBody">คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctl" id="btnExport">Export CSV (comparisons)</button>
+      <button class="ctl" id="btnExportRanking">Export CSV (ranking)</button>
+    </div>
+
+    <p class="footnote" id="fnDesign">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม</p>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ---- Group assignment: from the link's URL, never asked in the form ----
+// Prof. Fukuchi's instruction was explicit: collect age/gender only, NOT
+// nationality. A self-report "are you Japanese?" checkbox would just be
+// nationality by another name, so group/country is derived purely from
+// which link the participant opened (?group=th or ?group=ja), set by
+// whoever distributes the link, and is never a question in this form.
+var params = new URLSearchParams(location.search);
+var GROUP = params.get("group") === "ja" ? "ja" : (params.get("group") === "th" ? "th" : null);
+// Carrier condition: "beep" (Komatsu 2006 triangle wave, zero uncited
+// engineering - literature-pure) is the default, since using the creature
+// voice as the main study stimulus means part of any "sounds weak" effect
+// could come from undisclosed carrier choices (sawtooth timbre, -14dB breath
+// noise mix) rather than the cited duration/pitch/contour manipulation alone.
+// Pass ?cond=creature to run the richer "v3" voice instead (e.g. for a
+// supplementary/exploratory arm, not the primary literature-pure claim).
+var COND = params.get("cond") === "creature" ? "creature" : "beep";
+var COND_FOLDER = COND === "creature" ? "mono_v3" : "mono_beep";
+var groupWarnEl = document.getElementById("groupWarn");
+if (!GROUP){
+  GROUP = "th";
+  groupWarnEl.style.display = "block";
+  groupWarnEl.textContent = "No ?group= in the URL - defaulting to \"th\". Always share the link with ?group=th or ?group=ja appended.";
+}
+
+var LANGS = ["th", "en", "ja"];
+var LANG_NAMES = { th: "TH", en: "EN", ja: "JA" };
+var lang = GROUP === "ja" ? "ja" : "th";
+
+var STR = {
+  title: { th: "หุ่นยนต์อ่อนแอ — จัดอันดับเสียง", en: "Weak Robot — Sound Ranking", ja: "弱いロボット — 音のランキング" },
+  lede: {
+    th: "เปรียบเทียบเสียงทีละคู่ ฟัง F (ซ้าย) แล้ว J (ขวา) แล้วเลือกเสียงที่ทำให้คุณ \"อยากเข้าไปช่วย\" มากกว่า ไม่เก็บชื่อ อีเมล หรือสัญชาติ",
+    en: "Compare sounds one pair at a time. Listen to F (left) then J (right), and choose the one that makes you want to go help more. No name, email, or nationality is collected.",
+    ja: "音を1組ずつ比較します。F（左）とJ（右）を聞いて、より「助けに行きたい」と感じた方を選んでください。氏名・メールアドレス・国籍は収集しません。"
+  },
+  demoTitle: { th: "ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)", en: "Before you start — a few general questions (no name, email, or nationality collected)", ja: "開始前に — 一般的な質問です（氏名・メール・国籍は収集しません）" },
+  lblAge: { th: "ช่วงอายุ", en: "Age group", ja: "年齢層" },
+  lblGender: { th: "เพศ", en: "Gender", ja: "性別" },
+  lblPet: { th: "เคยเลี้ยงสัตว์มั้ย", en: "Ever kept a pet?", ja: "ペットを飼ったことがありますか？" },
+  lblHearing: { th: "มีปัญหาการได้ยินที่ทราบมั้ย", en: "Known hearing difficulty?", ja: "聴覚に関して自覚している困難はありますか？" },
+  btnDemoContinue: { th: "เริ่มทำแบบทดสอบ", en: "Start", ja: "開始する" },
+  demoHint: { th: "เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้", en: "Fill in every field to continue", ja: "全て選択してから開始してください" },
+  pScenario: { th: "สถานการณ์: หุ่นยนต์ทำงานต่อไม่ได้ และกำลังร้องเรียกคุณอยู่", en: "Scenario: a robot can't continue its task, and is calling out to you.", ja: "状況：ロボットが作業を続けられず、あなたに呼びかけています。" },
+  pQuestion: { th: "เสียงไหนทำให้คุณ \"อยากเข้าไปช่วย\" มากกว่ากัน?", en: "Which sound makes you want to go help more?", ja: "どちらの音の方が助けに行きたくなりますか？" },
+  progressUnit: { th: "คู่ (โดยประมาณ)", en: "pairs (approx.)", ja: "ペア（概算）" },
+  subLeft: { th: "ซ้าย", en: "left", ja: "左" },
+  subRight: { th: "ขวา", en: "right", ja: "右" },
+  btnStart: { th: "เริ่ม / เล่นคู่นี้", en: "Start / play this pair", ja: "開始 / このペアを再生" },
+  btnReplay: { th: "เล่นซ้ำ (Space)", en: "Replay (Space)", ja: "もう一度 (Space)" },
+  pHint: { th: "กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "<b>F</b> = choose left &nbsp;·&nbsp; <b>J</b> = choose right &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>F</b> = 左を選択 &nbsp;·&nbsp; <b>J</b> = 右を選択 &nbsp;·&nbsp; 両方再生後のみ選択できます" },
+  doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
+  doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
+};
+
+function applyLang(){
+  document.documentElement.setAttribute("lang", lang);
+  document.getElementById("langToggle").textContent = LANG_NAMES[LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]];
+  document.getElementById("hTitle").textContent = STR.title[lang];
+  document.getElementById("pLede").textContent = STR.lede[lang];
+  document.getElementById("demoTitle").textContent = STR.demoTitle[lang];
+  document.getElementById("lblAge").textContent = STR.lblAge[lang];
+  document.getElementById("lblGender").textContent = STR.lblGender[lang];
+  document.getElementById("lblPet").textContent = STR.lblPet[lang];
+  document.getElementById("lblHearing").textContent = STR.lblHearing[lang];
+  document.getElementById("btnDemoContinue").textContent = STR.btnDemoContinue[lang];
+  document.getElementById("demoHint").textContent = STR.demoHint[lang];
+  document.getElementById("pScenario").textContent = STR.pScenario[lang];
+  document.getElementById("pQuestion").textContent = STR.pQuestion[lang];
+  document.getElementById("progressUnit").textContent = STR.progressUnit[lang];
+  document.getElementById("subLeft").textContent = STR.subLeft[lang];
+  document.getElementById("subRight").textContent = STR.subRight[lang];
+  document.getElementById("btnStart").textContent = STR.btnStart[lang];
+  document.getElementById("btnReplay").textContent = STR.btnReplay[lang];
+  document.getElementById("pHint").innerHTML = STR.pHint[lang];
+  document.getElementById("doneTitle").textContent = STR.doneTitle[lang];
+  document.getElementById("doneBody").textContent = STR.doneBody[lang];
+  document.querySelectorAll("#demoCard option, #demoCard select option").forEach(function(opt){
+    if (opt.dataset[lang] != null) opt.textContent = opt.dataset[lang];
+  });
+}
+
+document.getElementById("langToggle").addEventListener("click", function(){
+  lang = LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length];
+  applyLang();
+});
+
+// ---- Demographics gate ----
+var DEMO_KEY = "mono_rank_demo_v1_" + GROUP + "_" + COND;
+function loadDemo(){ var raw = localStorage.getItem(DEMO_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return null; }
+function saveDemo(d){ localStorage.setItem(DEMO_KEY, JSON.stringify(d)); }
+
+var demoCard = document.getElementById("demoCard");
+var mainArea = document.getElementById("mainArea");
+var demoAge = document.getElementById("demoAge"), demoGender = document.getElementById("demoGender");
+var demoPet = document.getElementById("demoPet"), demoHearing = document.getElementById("demoHearing");
+var demoHint = document.getElementById("demoHint");
+
+function showMainArea(){ demoCard.style.display = "none"; mainArea.style.display = ""; }
+
+document.getElementById("btnDemoContinue").addEventListener("click", function(){
+  var d = { age: demoAge.value, gender: demoGender.value, pet: demoPet.value, hearing: demoHearing.value, group: GROUP };
+  if (!d.age || !d.gender || !d.pet || !d.hearing){
+    demoHint.style.color = "var(--accent)";
+    demoHint.textContent = STR.demoHint[lang];
+    return;
+  }
+  saveDemo(d);
+  showMainArea();
+});
+
+// ---- Participant id (resume support + DataPipe filename) ----
+var PID_KEY = "mono_rank_pid_v1_" + GROUP + "_" + COND;
+function loadOrInitPid(){
+  var pid = localStorage.getItem(PID_KEY);
+  if (pid) return pid;
+  var chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  pid = "";
+  for (var i = 0; i < 10; i++) pid += chars[Math.floor(Math.random() * chars.length)];
+  localStorage.setItem(PID_KEY, pid);
+  return pid;
+}
+var PID = loadOrInitPid();
+
+// ---- The 20-cell stimulus grid (creature v3, duration x pitch x contour) ----
+var DURS = [{ k: "short", ms: 180 }, { k: "long", ms: 900 }];
+var PITCHES = [{ k: "low", hz: 400 }, { k: "high", hz: 850 }];
+var CONTOURS = ["flat", "fall", "rise", "risefall", "fallrise"];
+
+function allItems(){
+  var out = [];
+  DURS.forEach(function(d){
+    PITCHES.forEach(function(p){
+      CONTOURS.forEach(function(c){
+        out.push({ id: d.k + "_" + p.k + "_" + c, dur: d.k, dur_ms: d.ms, pitch: p.k, pitch_hz: p.hz, contour: c });
+      });
+    });
+  });
+  return out;
+}
+var ITEMS = allItems();
+var ITEM_BY_ID = {};
+ITEMS.forEach(function(it){ ITEM_BY_ID[it.id] = it; });
+
+function src(id){ return "audio/" + COND_FOLDER + "/" + id + ".wav"; }
+
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rnd){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(rnd() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+
+// ---- Adaptive merge-sort comparison engine ----
+// Per Silverstein & Farrell (2001, J. Electronic Imaging 10(2):394-398,
+// "Efficient method for paired comparison" - cited from memory, not yet
+// full-text verified in this project) and the broader active/adaptive
+// paired-comparison tradition (TrueSkill-style): a standard merge sort over
+// n=20 items needs ~n*ceil(log2 n) - 2^ceil(log2 n) + 1 = 69 comparisons in
+// the worst case (vs. 190 for a full round-robin), while still producing a
+// COMPLETE ranking of all 20 items per participant - not a random subset.
+function* mergeGen(left, right){
+  var result = [], i = 0, j = 0;
+  while (i < left.length && j < right.length){
+    var c = yield [left[i], right[j]];
+    if (c <= 0) result.push(left[i++]); else result.push(right[j++]);
+  }
+  while (i < left.length) result.push(left[i++]);
+  while (j < right.length) result.push(right[j++]);
+  return result;
+}
+function* mergeSortGen(arr){
+  if (arr.length <= 1) return arr;
+  var mid = arr.length >> 1;
+  var left = yield* mergeSortGen(arr.slice(0, mid));
+  var right = yield* mergeSortGen(arr.slice(mid));
+  return yield* mergeGen(left, right);
+}
+
+var N = ITEMS.length;
+var WORST_CASE = N * Math.ceil(Math.log2(N)) - Math.pow(2, Math.ceil(Math.log2(N))) + 1;
+document.getElementById("progressTotal").textContent = "~" + WORST_CASE;
+
+var seedRnd = mulberry32(parseInt(PID.split("").reduce(function(a, c){ return a + c.charCodeAt(0); }, 0) * 2654435761 % 1e9, 10) || 12345);
+var shuffledIds = shuffle(ITEMS.map(function(it){ return it.id; }), seedRnd);
+
+var RESULTS_KEY = "mono_rank_results_v1_" + GROUP + "_" + COND;
+var RANKING_KEY = "mono_rank_final_v1_" + GROUP + "_" + COND;
+function loadResults(){ var raw = localStorage.getItem(RESULTS_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return []; }
+function saveResults(r){ localStorage.setItem(RESULTS_KEY, JSON.stringify(r)); }
+function saveFinalRanking(r){ localStorage.setItem(RANKING_KEY, JSON.stringify(r)); }
+function loadFinalRanking(){ var raw = localStorage.getItem(RANKING_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return null; }
+
+var results = loadResults();
+var gen = mergeSortGen(shuffledIds);
+var genState = gen.next(); // first .value is a pair, or (if N<=1) done immediately
+// Resume support: replaying the same sequence of past choices through a
+// freshly-constructed generator reproduces the exact same sequence of pair
+// prompts (the generator is a pure function of its input array + the
+// comparison results it's fed), so a page reload mid-session can fast-forward
+// back to the current frontier instead of silently re-asking question 1.
+results.forEach(function(r){
+  if (genState.done) return;
+  genState = gen.next(r.choice_side === "left" ? -1 : 1);
+});
+var trialIdx = results.length;
+var finalRanking = loadFinalRanking();
+
+// ---- Audio engine (adapted from pairwise_compare/index.html) ----
+var audioCtx = null, bufferCache = {};
+var audioErrorEl = document.getElementById("audioError");
+function ensureCtx(){ if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); return audioCtx; }
+function showAudioError(err){ audioErrorEl.style.display = "block"; audioErrorEl.textContent = (lang === "en" ? "Couldn't load/play audio (" : lang === "ja" ? "音声を再生できません (" : "เล่น/โหลดเสียงไม่ได้ (") + (err && err.message ? err.message : err) + ")"; }
+function clearAudioError(){ audioErrorEl.style.display = "none"; }
+function loadBuffer(url){
+  if (bufferCache[url]) return Promise.resolve(bufferCache[url]);
+  return fetch(url).then(function(r){ if (!r.ok) throw new Error(url + " " + r.status); return r.arrayBuffer(); })
+    .then(function(buf){ return ensureCtx().decodeAudioData(buf); })
+    .then(function(decoded){ bufferCache[url] = decoded; return decoded; });
+}
+
+var slotLeft = document.getElementById("slotLeft"), slotRight = document.getElementById("slotRight");
+var btnStart = document.getElementById("btnStart"), btnReplay = document.getElementById("btnReplay");
+var pairCard = document.getElementById("pairCard"), doneCard = document.getElementById("doneCard");
+var progressCount = document.getElementById("progressCount"), progressPct = document.getElementById("progressPct"), barFill = document.getElementById("barFill");
+var canAnswer = false, rightEndedAt = null, pendingSide = null, pendingKeyDownAt = null, lastChoiceResult = null;
+var activeSources = [];
+
+function stopActiveSources(){ activeSources.forEach(function(s){ try { s.stop(); } catch(e){} }); activeSources = []; }
+function clearSlots(){ slotLeft.classList.remove("playing", "chosen"); slotRight.classList.remove("playing", "chosen"); }
+
+function updateProgress(){
+  progressCount.textContent = trialIdx;
+  var pct = Math.min(100, Math.round((trialIdx / WORST_CASE) * 100));
+  progressPct.textContent = pct + "%";
+  barFill.style.width = pct + "%";
+}
+
+function finishStudy(){
+  pairCard.style.display = "none";
+  doneCard.style.display = "block";
+  saveFinalRanking(finalRanking);
+}
+
+function setupTrial(){
+  clearSlots();
+  canAnswer = false;
+  btnReplay.disabled = true;
+  rightEndedAt = null;
+  updateProgress();
+}
+
+function playPair(){
+  if (genState.done) return;
+  var pair = genState.value;
+  var leftId = pair[0], rightId = pair[1];
+  clearSlots();
+  stopActiveSources();
+  clearAudioError();
+  canAnswer = false;
+  btnReplay.disabled = true;
+  var startAt;
+  Promise.all([loadBuffer(src(leftId)), loadBuffer(src(rightId))]).then(function(bufs){
+    var ctx = ensureCtx();
+    startAt = ctx.currentTime + 0.05;
+    var srcL = ctx.createBufferSource(); srcL.buffer = bufs[0]; srcL.connect(ctx.destination);
+    var srcR = ctx.createBufferSource(); srcR.buffer = bufs[1]; srcR.connect(ctx.destination);
+    var gap = 0.15;
+    srcL.start(startAt);
+    var rightStart = startAt + bufs[0].duration + gap;
+    srcR.start(rightStart);
+    activeSources = [srcL, srcR];
+    slotLeft.classList.add("playing");
+    setTimeout(function(){ slotLeft.classList.remove("playing"); slotRight.classList.add("playing"); }, (bufs[0].duration + gap) * 1000);
+    setTimeout(function(){
+      slotRight.classList.remove("playing");
+      rightEndedAt = performance.now();
+      canAnswer = true;
+      btnReplay.disabled = false;
+    }, (bufs[0].duration + gap + bufs[1].duration) * 1000);
+    window.__pairLeftId = leftId; window.__pairRightId = rightId;
+  }).catch(function(err){ showAudioError(err); });
+}
+
+function choose(side, rtMs){
+  if (!canAnswer) return;
+  var leftId = window.__pairLeftId, rightId = window.__pairRightId;
+  var chosenId = side === "left" ? leftId : rightId;
+  (side === "left" ? slotLeft : slotRight).classList.add("chosen");
+  var li = ITEM_BY_ID[leftId], ri = ITEM_BY_ID[rightId];
+  var entry = {
+    pid: PID, group: GROUP, cond: COND, trial: trialIdx,
+    left_id: leftId, right_id: rightId,
+    left_dur: li.dur, left_pitch: li.pitch, left_contour: li.contour,
+    right_dur: ri.dur, right_pitch: ri.pitch, right_contour: ri.contour,
+    choice_side: side, choice_id: chosenId,
+    rt_ms: rtMs != null ? Math.round(rtMs) : null,
+    hold_ms: null,
+    ts: new Date().toISOString()
+  };
+  results.push(entry);
+  lastChoiceResult = entry;
+  saveResults(results);
+  canAnswer = false;
+  trialIdx++;
+  // side === "left" means the left item is preferred -> comparator returns
+  // -1 (left sorts first) when left was chosen, 1 otherwise.
+  var cmpResult = side === "left" ? -1 : 1;
+  setTimeout(function(){
+    genState = gen.next(cmpResult);
+    if (genState.done){
+      finalRanking = genState.value.map(function(id, idx){ var it = ITEM_BY_ID[id]; return { rank: idx + 1, id: id, dur: it.dur, pitch: it.pitch, contour: it.contour }; });
+      updateProgress();
+      finishStudy();
+    } else {
+      setupTrial();
+      playPair();
+    }
+  }, 450);
+}
+
+btnStart.addEventListener("click", function(){ if (!genState.done) playPair(); });
+btnReplay.addEventListener("click", function(){ if (!genState.done) playPair(); });
+
+document.addEventListener("keydown", function(e){
+  if (e.repeat) return;
+  var k = e.key.toLowerCase();
+  if (k === "f" || k === "j"){
+    if (!canAnswer) return;
+    var now = performance.now();
+    pendingKeyDownAt = now;
+    pendingSide = k === "f" ? "left" : "right";
+    choose(pendingSide, rightEndedAt != null ? now - rightEndedAt : null);
+  } else if (k === " "){
+    e.preventDefault();
+    if (!genState.done) playPair();
+  }
+});
+document.addEventListener("keyup", function(e){
+  var k = e.key.toLowerCase();
+  if (k !== "f" && k !== "j") return;
+  var side = k === "f" ? "left" : "right";
+  if (lastChoiceResult && lastChoiceResult.hold_ms == null && pendingSide === side && pendingKeyDownAt != null){
+    lastChoiceResult.hold_ms = Math.round(performance.now() - pendingKeyDownAt);
+    saveResults(results);
+  }
+});
+
+// ---- Export + online submission (DataPipe/OSF, same mechanism as survey/) ----
+// Leave DATAPIPE_ID empty to run in pilot mode (participants get a manual
+// download button instead) - same convention as survey/js/config.js.
+var DATAPIPE_ID = "";
+
+function buildComparisonsCsv(){
+  var cols = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","rt_ms","hold_ms","ts"];
+  var lines = [cols.join(",")];
+  results.forEach(function(r){ lines.push(cols.map(function(c){ return r[c]; }).join(",")); });
+  return lines.join("\n");
+}
+function buildRankingCsv(){
+  var demo = loadDemo() || {};
+  var cols = ["pid","group","cond","age","gender","pet","hearing","rank","id","dur","pitch","contour"];
+  var lines = [cols.join(",")];
+  (finalRanking || []).forEach(function(r){
+    var row = { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, hearing: demo.hearing, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
+    lines.push(cols.map(function(c){ return row[c]; }).join(","));
+  });
+  return lines.join("\n");
+}
+async function submitToDataPipe(filename, data){
+  if (!DATAPIPE_ID) return false;
+  try{
+    var res = await fetch("https://pipe.jspsych.org/api/data/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ experimentID: DATAPIPE_ID, filename: filename, data: data })
+    });
+    return res.ok;
+  } catch(e){ return false; }
+}
+async function exportCsv(csv, fname){
+  var sent = await submitToDataPipe(fname, csv);
+  if (sent) return true;
+  try{
+    var downloads = await window.claude?.use?.("downloads");
+    if (downloads){ await downloads.save({ filename: fname, data: csv }); return true; }
+  } catch(e){}
+  try{ await navigator.clipboard.writeText(csv); } catch(e){}
+  return false;
+}
+document.getElementById("btnExport").addEventListener("click", function(){ exportCsv(buildComparisonsCsv(), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+document.getElementById("btnExportRanking").addEventListener("click", function(){ exportCsv(buildRankingCsv(), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+
+// Auto-submit on completion if DataPipe is configured.
+var origFinish = finishStudy;
+finishStudy = function(){
+  origFinish();
+  if (DATAPIPE_ID){
+    exportCsv(buildComparisonsCsv(), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv");
+    exportCsv(buildRankingCsv(), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv");
+  }
+};
+
+// ---- Init ----
+var existingDemo = loadDemo();
+applyLang();
+if (existingDemo){
+  demoAge.value = existingDemo.age || ""; demoGender.value = existingDemo.gender || "";
+  demoPet.value = existingDemo.pet || ""; demoHearing.value = existingDemo.hearing || "";
+  showMainArea();
+}
+if (finalRanking){ finishStudy(); } else { setupTrial(); }
+})();
+</script>
+</body>
+</html>

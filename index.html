@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pairwise F/J — Length x Pitch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF8F3; --card:#FFFFFF; --ink:#1F2A3A; --muted:#6B7686; --border:#E4DFD6;
+  --accent:#A14B3C; --f:#2E6B8A; --j:#A1663C; --ok:#2E8B57;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181D; --card:#1E2228; --ink:#E8E6E1; --muted:#9AA3AE; --border:#2E333B;
+    --accent:#E08A6E; --f:#6FB4DC; --j:#DCA373; --ok:#5FC98A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181D; --card:#1E2228; --ink:#E8E6E1; --muted:#9AA3AE; --border:#2E333B;
+  --accent:#E08A6E; --f:#6FB4DC; --j:#DCA373; --ok:#5FC98A; color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-block:26px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topbar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+h1{font-family:"EB Garamond",Georgia,serif;font-size:27px;font-weight:600;margin:0}
+.langbtn{background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:12.5px;font-weight:600;border-radius:999px;padding:6px 14px;cursor:pointer;font-family:inherit}
+p.lede{color:var(--muted);font-size:14.5px;margin:6px 0 20px;max-width:62ch}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.tabs{display:flex;gap:8px;background:var(--border);border-radius:12px;padding:5px;margin-bottom:16px}
+.tab{flex:1;text-align:center;padding:9px 8px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:inherit}
+.tab.active{background:var(--card);color:var(--accent)}
+.progress-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+.bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.bar-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .2s}
+.scenario{font-size:13.5px;color:var(--muted);font-style:italic;margin-bottom:4px}
+.question{font-size:18px;font-weight:600;text-align:center;margin:10px 0 20px}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.slot{border:2px solid var(--border);border-radius:16px;padding:22px 10px;text-align:center;transition:border-color .15s,background .15s}
+.slot.playing{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--card))}
+.slot .key{font-family:"EB Garamond",Georgia,serif;font-size:40px;font-weight:600;line-height:1}
+.slot.f .key{color:var(--f)}
+.slot.j .key{color:var(--j)}
+.slot .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.slot.chosen{background:color-mix(in srgb, var(--ok) 14%, var(--card));border-color:var(--ok)}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+button.ctl{background:var(--card);border:1px solid var(--border);color:var(--ink);font-size:14px;font-weight:600;border-radius:10px;padding:10px 18px;cursor:pointer;font-family:inherit}
+button.ctl.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.ctl:disabled{opacity:.4;cursor:not-allowed}
+.hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px}
+.done{text-align:center;padding:30px 10px}
+.done h2{font-size:22px;margin:0 0 8px}
+.ref{font-size:13px;color:var(--muted)}
+.ref table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.ref th,.ref td{border-bottom:1px solid var(--border);padding:5px 6px;text-align:left}
+.ref th{color:var(--muted);font-weight:600}
+.footnote{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:4px}
+.ratebox{border:2px solid var(--border);border-radius:16px;padding:20px 14px;text-align:center;margin-bottom:14px;transition:border-color .15s,background .15s}
+.ratebox.playing{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--card))}
+.ratebox .key{font-family:"EB Garamond",Georgia,serif;font-size:34px;font-weight:600;line-height:1;color:var(--accent)}
+.ratebox .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.rate-item{margin:16px 0}
+.rate-q{font-size:14px;font-weight:600;margin-bottom:10px;text-align:center}
+.rate-scale{display:flex;gap:6px;justify-content:center}
+.rate-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.rate-btn.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rate-endlabels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:4px;max-width:250px;margin-inline:auto}
+.demo-row{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.demo-row label{flex:0 0 160px;font-size:13.5px;color:var(--muted)}
+.demo-sel{flex:1;min-width:160px;background:var(--card);border:1px solid var(--border);color:var(--ink);font-size:14px;border-radius:10px;padding:8px 10px;font-family:inherit}
+[data-en]:not([data-th]){display:none}
+:root[data-lang="en"] [data-th]:not([data-en]){display:none}
+:root[data-lang="en"] [data-en]:not([data-th]){display:inline}
+:root[data-lang="en"] [data-en]:not([data-th]).block{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1>Pairwise F / J <span data-th>— ความยาว x พิตช์</span><span data-en>— Length x Pitch</span></h1>
+    <button class="langbtn" id="langToggle">EN</button>
+  </div>
+  <p class="lede">
+    <span data-th>ต้นแบบเครื่องมือเปรียบเทียบคู่ (pairwise) ตามที่โปรเฟสเซอร์ Fukuchi แนะนำมาทางอีเมล — แทนที่สเกล 5 ระดับด้วยการเลือกแบบบังคับ (forced choice) ฟังซ้าย (F) แล้วขวา (J) เลือกอันที่รู้สึกอยากช่วยมากกว่า เร็วกว่าแบบ Likert มาก</span>
+    <span data-en>Prototype pairwise comparison tool, per Prof. Fukuchi's email suggestion — replaces the 5-point Likert scale with a forced choice. Listen left (F) then right (J), pick the one that makes you want to help more. Much faster than Likert.</span>
+  </p>
+
+  <p id="audioError" class="hint" style="display:none;color:var(--accent);font-weight:600"></p>
+
+  <div class="card" id="demoCard">
+    <div class="scenario">
+      <span data-th>ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)</span>
+      <span data-en>Before you start — a few general questions (no name, email, or nationality collected)</span>
+    </div>
+    <div class="demo-row">
+      <label data-th="ช่วงอายุ" data-en="Age group">ช่วงอายุ</label>
+      <select class="demo-sel" id="demoAge">
+        <option value="" data-th="— เลือก —" data-en="— Select —">— เลือก —</option>
+        <option value="18-29">18–29</option>
+        <option value="30-39">30–39</option>
+        <option value="40-49">40–49</option>
+        <option value="50-64">50–64</option>
+        <option value="65+">65+</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label data-th="เพศ" data-en="Gender">เพศ</label>
+      <select class="demo-sel" id="demoGender">
+        <option value="" data-th="— เลือก —" data-en="— Select —">— เลือก —</option>
+        <option value="f" data-th="หญิง" data-en="Female">หญิง</option>
+        <option value="m" data-th="ชาย" data-en="Male">ชาย</option>
+        <option value="o" data-th="อื่นๆ" data-en="Other">อื่นๆ</option>
+        <option value="na" data-th="ไม่ระบุ" data-en="Prefer not to say">ไม่ระบุ</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label data-th="เคยเลี้ยงสัตว์มั้ย" data-en="Ever kept a pet?">เคยเลี้ยงสัตว์มั้ย</label>
+      <select class="demo-sel" id="demoPet">
+        <option value="" data-th="— เลือก —" data-en="— Select —">— เลือก —</option>
+        <option value="none" data-th="ไม่เคย" data-en="None">ไม่เคย</option>
+        <option value="dog" data-th="สุนัข" data-en="Dog">สุนัข</option>
+        <option value="cat" data-th="แมว" data-en="Cat">แมว</option>
+        <option value="small" data-th="สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)" data-en="Small animal (rabbit, guinea pig, hamster…)">สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)</option>
+        <option value="other" data-th="อื่นๆ" data-en="Other">อื่นๆ</option>
+      </select>
+    </div>
+    <div class="demo-row">
+      <label data-th="มีปัญหาการได้ยินที่ทราบมั้ย" data-en="Known hearing difficulty?">มีปัญหาการได้ยินที่ทราบมั้ย</label>
+      <select class="demo-sel" id="demoHearing">
+        <option value="" data-th="— เลือก —" data-en="— Select —">— เลือก —</option>
+        <option value="no" data-th="ไม่มี" data-en="No">ไม่มี</option>
+        <option value="yes" data-th="มี" data-en="Yes">มี</option>
+      </select>
+    </div>
+    <div class="controls">
+      <button class="ctl primary" id="btnDemoContinue" data-th="เริ่มทำแบบทดสอบ" data-en="Start">เริ่มทำแบบทดสอบ</button>
+    </div>
+    <p class="hint" id="demoHint" data-th="เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้" data-en="Fill in every field to continue">เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้</p>
+  </div>
+
+  <div id="mainArea" style="display:none">
+  <div class="tabs">
+    <button class="tab active" data-track="word" data-th-label="เวอร์ชันคำพูด" data-en-label="Word version">เวอร์ชันคำพูด</button>
+    <button class="tab" data-track="beep" data-th-label="เวอร์ชันเสียงบี๊บ" data-en-label="Beep version">เวอร์ชันเสียงบี๊บ</button>
+    <button class="tab" data-track="matched" data-th-label="คำ vs บี๊บ (คู่ตรง)" data-en-label="Word vs beep (matched)">คำ vs บี๊บ (คู่ตรง)</button>
+  </div>
+
+  <div class="card" id="pairCard">
+    <div class="scenario">
+      <span data-th>สถานการณ์: หุ่นยนต์ทำงานต่อไม่ได้ และกำลังร้องเรียกคุณอยู่</span>
+      <span data-en>Scenario: a robot can't continue its task, and is calling out to you.</span>
+    </div>
+    <div class="question">
+      <span data-th>เสียงไหนทำให้คุณ "อยากเข้าไปช่วย" มากกว่ากัน?</span>
+      <span data-en>Which sound makes you want to go help more?</span>
+    </div>
+
+    <div class="progress-row">
+      <span><span id="progressCount">0</span> / <span id="progressTotal">120</span> <span data-th>คู่</span><span data-en>pairs</span></span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+
+    <div class="stage">
+      <div class="slot f" id="slotLeft">
+        <div class="key">F</div>
+        <div class="sub" data-th>ซ้าย</div><div class="sub" data-en>left</div>
+      </div>
+      <div class="slot j" id="slotRight">
+        <div class="key">J</div>
+        <div class="sub" data-th>ขวา</div><div class="sub" data-en>right</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctl primary" id="btnStart" data-th="เริ่ม / เล่นคู่นี้" data-en="Start / play this pair">เริ่ม / เล่นคู่นี้</button>
+      <button class="ctl" id="btnReplay" disabled data-th="เล่นซ้ำ (Space)" data-en="Replay (Space)">เล่นซ้ำ (Space)</button>
+    </div>
+    <p class="hint">
+      <span data-th>กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น</span>
+      <span data-en><b>F</b> = choose left &nbsp;·&nbsp; <b>J</b> = choose right &nbsp;·&nbsp; you can answer only after both have played</span>
+    </p>
+  </div>
+
+  <div class="card" id="rateCard" style="display:none">
+    <div class="scenario">
+      <span data-th>ขั้นที่ 2 — ให้คะแนนเสียงนี้ทีละเสียง (ไม่เทียบคู่แล้ว)</span>
+      <span data-en>Step 2 — rate this sound on its own (no more pair comparisons)</span>
+    </div>
+    <div class="progress-row">
+      <span><span id="rateCount">0</span> / <span id="rateTotal">16</span> <span data-th>เสียง</span><span data-en>sounds</span></span>
+      <span id="ratePct">0%</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="rateBarFill" style="width:0%"></div></div>
+
+    <div class="ratebox" id="rateSlot">
+      <div class="key">▶</div>
+      <div class="sub" data-th>เสียงนี้</div><div class="sub" data-en>this sound</div>
+    </div>
+    <div class="controls">
+      <button class="ctl primary" id="btnRatePlay" data-th="เล่น" data-en="Play">เล่น</button>
+      <button class="ctl" id="btnRateReplay" disabled data-th="เล่นซ้ำ (Space)" data-en="Replay (Space)">เล่นซ้ำ (Space)</button>
+    </div>
+
+    <div id="rateItems"></div>
+
+    <div class="controls">
+      <button class="ctl primary" id="btnRateNext" disabled data-th="ถัดไป" data-en="Next">ถัดไป</button>
+    </div>
+    <p class="hint">
+      <span data-th>ฟังก่อนอย่างน้อย 1 ครั้ง แล้วให้คะแนนครบทั้ง 3 ข้อ ถึงจะกด "ถัดไป" ได้</span>
+      <span data-en>Listen at least once, then rate all 3 items before "Next" unlocks</span>
+    </p>
+  </div>
+
+  <div class="card" id="doneCard" style="display:none">
+    <div class="done">
+      <h2 data-th="เสร็จสิ้นชุดนี้แล้ว" data-en="This set is done">เสร็จสิ้นชุดนี้แล้ว</h2>
+      <p class="ref" data-th="ขอบคุณที่ลองฟังครบทุกคู่ — เลือกแท็บด้านบนเพื่อลองอีกแทร็ก หรือกด Export ด้านล่าง" data-en="Thanks for going through every pair — switch tabs above to try the other track, or export below.">ขอบคุณที่ลองฟังครบทุกคู่ — เลือกแท็บด้านบนเพื่อลองอีกแทร็ก หรือกด Export ด้านล่าง</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctl" id="btnExport" data-th="Export CSV (pairwise)" data-en="Export CSV (pairwise)">Export CSV (pairwise)</button>
+    <button class="ctl" id="btnExportRatings" data-th="Export CSV (ratings)" data-en="Export CSV (ratings)">Export CSV (ratings)</button>
+    <button class="ctl" id="btnReset" data-th="ล้างคำตอบแทร็กนี้ (ทั้งคู่+ให้คะแนน)" data-en="Reset this track (pairwise+ratings)">ล้างคำตอบแทร็กนี้ (ทั้งคู่+ให้คะแนน)</button>
+  </div>
+
+  <div class="card ref">
+    <b data-th="อ้างอิง: Sada, Yamagiwa &amp; Okada (2016)" data-en="Reference: Sada, Yamagiwa &amp; Okada (2016)">อ้างอิง: Sada, Yamagiwa &amp; Okada (2016)</b>
+    <p>
+      <span data-th>"ゴミ箱ロボットにおける&lt;弱さ&gt;の表出について" (HIS Vol.18 No.3) — โปรเฟสเซอร์ Fukuchi ชี้ให้ดูงานนี้ว่าเวลาวัด "ความอ่อนแอ" ของหุ่นยนต์ ควรแยกถามเป็นแง่มุมที่เป็นรูปธรรมกว่า ไม่ใช่ถามตรงๆว่า "รู้สึก weak มั้ย" — มาตรวัด 20 ข้อของเขาแบ่งเป็น 5 ปัจจัย ดังนี้ (แปลคร่าวๆ):</span>
+      <span data-en>"On the Expression of &lt;Weakness&gt; in a Trash-Box Robot" (HIS Vol.18 No.3) — Prof. Fukuchi pointed to this paper: instead of asking "does it feel weak" directly, ask more concrete, primitive aspects. Their 20-item scale groups into 5 factors (translated):</span>
+    </p>
+    <table>
+      <tr><th data-th="ปัจจัย" data-en="Factor">ปัจจัย</th><th data-th="ตัวอย่างข้อคำถาม" data-en="Example items">ตัวอย่างข้อคำถาม</th></tr>
+      <tr><td data-th="สิ่งมีชีวิต (animacy)" data-en="Animacy">สิ่งมีชีวิต (animacy)</td><td data-th="รู้สึกว่าหุ่นยนต์มีชีวิต / เป็นเหมือนคน" data-en="Felt alive / human-like">รู้สึกว่าหุ่นยนต์มีชีวิต / เป็นเหมือนคน</td></tr>
+      <tr><td data-th="ท่าทีที่มีเป้าหมาย (intentional stance)" data-en="Intentional stance">ท่าทีที่มีเป้าหมาย (intentional stance)</td><td data-th="หุ่นยนต์ดูเหมือนมีเป้าหมาย / รู้ว่าอยากทำอะไร" data-en="Seemed to have a purpose / I understood what it wanted">หุ่นยนต์ดูเหมือนมีเป้าหมาย / รู้ว่าอยากทำอะไร</td></tr>
+      <tr><td data-th="การแสดงออกทางสังคม (struggling)" data-en="Social display / struggling">การแสดงออกทางสังคม (struggling)</td><td data-th="หุ่นยนต์ดูพยายามอยู่ / ดูมีปัญหา" data-en="Seemed to be trying hard / seemed to have a problem">หุ่นยนต์ดูพยายามอยู่ / ดูมีปัญหา</td></tr>
+      <tr><td data-th="ความร่วมมือ (wants help)" data-en="Cooperativity / wants help">ความร่วมมือ (wants help)</td><td data-th="หุ่นยนต์ดูเหมือนพึ่งคุณอยู่ / คุณอยากช่วยมัน ← ข้อนี้ตรงกับคำถามหลักของเครื่องมือนี้" data-en="Seemed to be relying on you / you wanted to help it ← this is what this tool's main question borrows">หุ่นยนต์ดูเหมือนพึ่งคุณอยู่ / คุณอยากช่วยมัน ← ข้อนี้ตรงกับคำถามหลักของเครื่องมือนี้</td></tr>
+      <tr><td data-th="อารมณ์ความรู้สึก (emotionality)" data-en="Emotionality">อารมณ์ความรู้สึก (emotionality)</td><td data-th="หุ่นยนต์ดูเศร้า / ดูหดหู่ / ดูสิ้นหวัง" data-en="Seemed sad / down / in despair">หุ่นยนต์ดูเศร้า / ดูหดหู่ / ดูสิ้นหวัง</td></tr>
+    </table>
+    <p data-th="ข้อค้นพบสำคัญในเปเปอร์นี้: ปัจจัยความร่วมมือและการแสดงออกทางสังคม ถูกขับเคลื่อนโดยพฤติกรรม 'หันเข้าหาคน' เป็นหลัก ไม่ใช่แค่ขนาดของการเคลื่อนไหว — อาจแปลว่าเสียงเพียงอย่างเดียวช่วยได้ระดับหนึ่ง แต่ทิศทาง/จังหวะที่ 'มุ่งไปหาคน' อาจสำคัญกว่าความเข้มของพารามิเตอร์เสียงเดี่ยวๆ" data-en="Key finding of that paper: the cooperativity and social-display factors were driven mainly by behavior oriented toward the PERSON, not just movement magnitude — possibly implying sound alone gets you partway, but timing/direction 'aimed at the person' may matter more than single-parameter intensity.">ข้อค้นพบสำคัญในเปเปอร์นี้: ปัจจัยความร่วมมือและการแสดงออกทางสังคม ถูกขับเคลื่อนโดยพฤติกรรม 'หันเข้าหาคน' เป็นหลัก ไม่ใช่แค่ขนาดของการเคลื่อนไหว — อาจแปลว่าเสียงเพียงอย่างเดียวช่วยได้ระดับหนึ่ง แต่ทิศทาง/จังหวะที่ 'มุ่งไปหาคน' อาจสำคัญกว่าความเข้มของพารามิเตอร์เสียงเดี่ยวๆ</p>
+  </div>
+
+  <p class="footnote" data-th="การออกแบบคู่ครั้งนี้: ความยาว (dur_ratio) 4 ระดับ [1.0, 1.5, 2.0, 2.6] x พิตช์ (semitone, ไม่มี contour/melody) 4 ระดับ [0, -1.5, -3.0, -4.5] = 16 เซลล์ ไม่แตะแกนอื่นเลย (จำนวนคำ/ช่องว่าง/เมโลดี้/brilliance/breathiness) ตามที่โปรเฟสเซอร์ขอให้จำกัด parameter space แค่ length กับ pitch รอบนี้ — pitch=0 รวมอยู่ด้วยเพื่อทดสอบสูตร Cahn (1990) ที่ไม่ลดพิตช์เลย" data-en="This round's grid: length (dur_ratio) 4 levels [1.0, 1.5, 2.0, 2.6] x pitch (flat semitone, no contour/melody) 4 levels [0, -1.5, -3.0, -4.5] = 16 cells. No other axis touched (call count / gaps / melody / brilliance / breathiness), per the professor's request to limit the parameter space to length and pitch this round — pitch=0 is included specifically to test Cahn's (1990) recipe, which does not lower pitch at all.">การออกแบบคู่ครั้งนี้: ความยาว (dur_ratio) 4 ระดับ [1.0, 1.5, 2.0, 2.6] x พิตช์ (semitone, ไม่มี contour/melody) 4 ระดับ [0, -1.5, -3.0, -4.5] = 16 เซลล์ ไม่แตะแกนอื่นเลย ตามที่โปรเฟสเซอร์ขอให้จำกัด parameter space แค่ length กับ pitch รอบนี้</p>
+
+  <p class="footnote" data-th="บันทึกเพิ่มนอกจากคำตอบ F/J: เวลาตอบ (rt_ms, จากฟังจบคู่ถึงกดเลือก) และระยะเวลากดค้าง (hold_ms, keydown ถึง keyup) — ทั้งสองตัวนี้ฟรีในแง่ต้นทุน ไม่ต้องใช้ฮาร์ดแวร์เพิ่ม ตามวรรณกรรมเรื่อง drift-diffusion/preference-strength (เช่น Konovalov & Krajbich 2019) เวลาตอบที่ช้ากว่ามักสื่อถึงคู่ที่ตัดสินใจยากกว่า/ใกล้เคียงกันกว่า ไม่ใช่ตัวชี้ความอ่อนแอ/เศร้าโดยตรง — ใช้เป็นตัววัดความมั่นใจ/ความใกล้เคียงของคู่นั้นแทน ส่วนสรีรวิทยา (heart rate, skin conductance, pupil) เป็นแนวที่น่าสนใจแต่ต้นทุนสูงกว่ามาก ยังไม่ใส่ในรอบนี้" data-en="Logged beyond the F/J answer: reaction time (rt_ms, from both sounds finishing to the keypress) and key-hold duration (hold_ms, keydown to keyup) — both are free to log, no extra hardware. Per the drift-diffusion / preference-strength literature (e.g. Konovalov &amp; Krajbich 2019), a slower RT tends to mark a harder/closer-call pair, not weakness/sadness directly — treat it as a confidence or closeness proxy. Physiological measures (heart rate, skin conductance, pupil) are a promising direction but far more costly to add and are not included this round.">บันทึกเพิ่มนอกจากคำตอบ F/J: เวลาตอบ (rt_ms) และระยะเวลากดค้าง (hold_ms) — ฟรีในแง่ต้นทุน ไม่ต้องใช้ฮาร์ดแวร์เพิ่ม</p>
+
+  <p class="footnote" data-th="(เพิ่ม 2026-10-28) ขั้นที่ 2 ให้คะแนนทีละเสียง: หลังทำคู่เทียบครบ ฟังทีละเสียง (16 เสียง) ให้คะแนน 1-5 สามข้อ คัดจากมาตรวัด 20 ข้อของ Sada et al. (2016) เฉพาะข้อที่ไม่พึ่งภาพ/ท่าทาง (ตัดข้อ animacy ออก เพราะของเดิมวัดจากวิดีโอ) และตัดข้อ cooperativity ออกเพราะเป็น DV หลักของคำถาม F/J อยู่แล้ว เหตุผล: อาจารย์ Fukuchi บอกไม่อยากวัดแค่ รู้สึกอ่อนแอมั้ย เฉยๆ แต่ pairwise ทุก construct (5 ปัจจัย x 120 คู่) ใช้เวลาเกินจะทำได้จริง จึงแยกเป็น (1) pairwise เป็น DV หลักแม่นสุด (2) ให้คะแนนทีละเสียงแบบสั้นเพิ่มโปรไฟล์กว้างขึ้น" data-en="(Added 2026-10-28) Step 2 per-sound rating: after finishing the pairwise comparisons, each of the 16 sounds is rated individually 1-5 on 3 items drawn from Sada et al.'s (2016) 20-item scale, picking only items that do not depend on visuals or gesture (animacy dropped, since the original measured it from video) and dropping the cooperativity item since it is already the main F/J question's dependent variable. Rationale: Prof. Fukuchi said not to measure just does it feel weak alone, but running every construct as a full pairwise set is not feasible time-wise, so the pairwise stays the precise main DV and this short per-sound rating adds a broader profile.">(เพิ่ม 2026-10-28) ขั้นที่ 2 ให้คะแนนทีละเสียง 3 ข้อ คัดจาก Sada et al. (2016)</p>
+  </div>
+</div>
+
+
+<script>
+(function(){
+"use strict";
+
+// ---- Demographics gate (added 2026-11-09) ----
+// Per Prof. Fukuchi's instruction: collect age and gender only, no nationality.
+// Pet ownership and hearing kept too, matching the fields already used in the
+// main idea1 survey (survey/js/experiment.js) for consistency across tracks.
+var DEMO_KEY = "pw_demo_v1";
+
+function loadDemo(){
+  var raw = localStorage.getItem(DEMO_KEY);
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  return null;
+}
+
+function saveDemo(d){ localStorage.setItem(DEMO_KEY, JSON.stringify(d)); }
+
+var demoCard = document.getElementById("demoCard");
+var mainArea = document.getElementById("mainArea");
+var demoAge = document.getElementById("demoAge");
+var demoGender = document.getElementById("demoGender");
+var demoPet = document.getElementById("demoPet");
+var demoHearing = document.getElementById("demoHearing");
+var btnDemoContinue = document.getElementById("btnDemoContinue");
+var demoHint = document.getElementById("demoHint");
+
+function showMainArea(){
+  demoCard.style.display = "none";
+  mainArea.style.display = "";
+}
+
+btnDemoContinue.addEventListener("click", function(){
+  var d = { age: demoAge.value, gender: demoGender.value, pet: demoPet.value, hearing: demoHearing.value };
+  if (!d.age || !d.gender || !d.pet || !d.hearing){
+    var en = document.documentElement.getAttribute("data-lang") === "en";
+    demoHint.style.color = "var(--accent)";
+    demoHint.textContent = en ? "Fill in every field to continue" : "เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้";
+    return;
+  }
+  saveDemo(d);
+  showMainArea();
+});
+
+var existingDemo = loadDemo();
+if (existingDemo){
+  demoAge.value = existingDemo.age || "";
+  demoGender.value = existingDemo.gender || "";
+  demoPet.value = existingDemo.pet || "";
+  demoHearing.value = existingDemo.hearing || "";
+  showMainArea();
+}
+
+var LENGTH_LEVELS = [1.0, 1.5, 2.0, 2.6];
+var PITCH_LEVELS  = [0.0, -1.5, -3.0, -4.5];
+
+// A cell id is normally bare ("len0_pit0"). In the "matched" (word-vs-beep)
+// track, each id carries an explicit track prefix ("word:len0_pit0" /
+// "beep:len0_pit0") so a single pair can mix two different audio folders.
+function splitId(id){
+  var i = id.indexOf(":");
+  return i === -1 ? { trackOverride: null, bare: id } : { trackOverride: id.slice(0,i), bare: id.slice(i+1) };
+}
+
+function cellInfo(id){
+  var bare = splitId(id).bare;
+  var m = bare.match(/^len(\d)_pit(\d)$/);
+  return { len_idx: +m[1], pit_idx: +m[2], dur_ratio: LENGTH_LEVELS[+m[1]], semitone: PITCH_LEVELS[+m[2]] };
+}
+
+function allCells(){
+  var cells = [];
+  for (var l = 0; l < 4; l++) for (var p = 0; p < 4; p++) cells.push("len"+l+"_pit"+p);
+  return cells;
+}
+
+function allPairs(){
+  var cells = allCells(), pairs = [];
+  for (var i = 0; i < cells.length; i++)
+    for (var j = i+1; j < cells.length; j++)
+      pairs.push([cells[i], cells[j]]);
+  return pairs;
+}
+
+// Matched cross-track block: for every one of the 16 length x pitch cells,
+// pair the VOICEVOX word call against the pure beep at the SAME cell - length
+// and pitch are held identical on both sides, so the only thing that differs
+// is the sound source itself (word vs beep). Answers "does timbre/source
+// alone move 'wants help', independent of length/pitch" without confounding
+// it with the within-track length x pitch comparisons (kept as separate tabs).
+function allMatchedPairs(){
+  return allCells().map(function(c){ return ["word:"+c, "beep:"+c]; });
+}
+
+function shuffle(arr, rnd){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(rnd() * (i+1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+var LS_PREFIX = "pw_grid_v1_";
+
+function lsKey(track, suffix){ return LS_PREFIX + track + "_" + suffix; }
+
+// ---- Tier 2: per-sound rating (added 2026-10-28) ----
+// 3 items drawn from Sada, Yamagiwa & Okada (2016)'s 20-item scale, restricted to
+// items that don't depend on visuals/gesture (animacy dropped - measured from video
+// in the original) and excluding cooperativity (already the pairwise question's DV).
+var RATING_ITEMS = [
+  { key: "intentional", th: "หุ่นยนต์ดูเหมือนมีเป้าหมาย / รู้ว่าอยากทำอะไร", en: "Seemed to have a purpose / I understood what it wanted" },
+  { key: "struggling",  th: "หุ่นยนต์ดูพยายามอยู่ / ดูมีปัญหา", en: "Seemed to be trying hard / seemed to have a problem" },
+  { key: "emotionality",th: "หุ่นยนต์ดูเศร้า / ดูหดหู่", en: "Seemed sad / down" }
+];
+
+function loadOrInitRatingOrder(track){
+  var key = lsKey(track, "rate_order");
+  var raw = localStorage.getItem(key);
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  var rnd = mulberry32(track === "word" ? 20261127 : 20261128);
+  var order = shuffle(allCells(), rnd);
+  localStorage.setItem(key, JSON.stringify(order));
+  return order;
+}
+
+function loadRatings(track){
+  var raw = localStorage.getItem(lsKey(track, "ratings"));
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  return [];
+}
+
+function saveRatings(track, ratings){
+  localStorage.setItem(lsKey(track, "ratings"), JSON.stringify(ratings));
+}
+
+var TRIAL_SEEDS = { word: 20261027, beep: 20261028, matched: 20261029 };
+
+function loadOrInitTrials(track){
+  var key = lsKey(track, "trials");
+  var raw = localStorage.getItem(key);
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  var rnd = mulberry32(TRIAL_SEEDS[track] || 1);
+  var basePairs = track === "matched" ? allMatchedPairs() : allPairs();
+  var pairs = shuffle(basePairs, rnd);
+  var trials = pairs.map(function(p){
+    var leftIsA = rnd() < 0.5;
+    return { a: p[0], b: p[1], left: leftIsA ? p[0] : p[1], right: leftIsA ? p[1] : p[0] };
+  });
+  localStorage.setItem(key, JSON.stringify(trials));
+  return trials;
+}
+
+function loadResults(track){
+  var raw = localStorage.getItem(lsKey(track, "results"));
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  return [];
+}
+
+function saveResults(track, results){
+  localStorage.setItem(lsKey(track, "results"), JSON.stringify(results));
+}
+
+// ---- state ----
+var track = "word";
+var trials = loadOrInitTrials(track);
+var results = loadResults(track);
+var idx = results.length;
+var canAnswer = false;
+var playToken = 0;
+var rightEndedAt = null;   // performance.now() when both sounds finished playing - RT start
+var pendingKeyDownAt = null;
+var pendingSide = null;
+var lastChoiceResult = null;
+
+var phase = "pairwise"; // "pairwise" | "rating" | "done"
+var ratingOrder = loadOrInitRatingOrder(track);
+var ratings = loadRatings(track);
+var ratingIdx = ratings.length;
+var ratingHasPlayed = false;
+var currentRatingSel = {};
+var ratingPlayToken = 0;
+
+var slotLeft = document.getElementById("slotLeft");
+var slotRight = document.getElementById("slotRight");
+var btnStart = document.getElementById("btnStart");
+var btnReplay = document.getElementById("btnReplay");
+var btnExport = document.getElementById("btnExport");
+var btnExportRatings = document.getElementById("btnExportRatings");
+var btnReset = document.getElementById("btnReset");
+var progressCount = document.getElementById("progressCount");
+var progressTotal = document.getElementById("progressTotal");
+var progressPct = document.getElementById("progressPct");
+var barFill = document.getElementById("barFill");
+var doneCard = document.getElementById("doneCard");
+var pairCard = document.getElementById("pairCard");
+var rateCard = document.getElementById("rateCard");
+var rateSlot = document.getElementById("rateSlot");
+var btnRatePlay = document.getElementById("btnRatePlay");
+var btnRateReplay = document.getElementById("btnRateReplay");
+var btnRateNext = document.getElementById("btnRateNext");
+var rateItemsEl = document.getElementById("rateItems");
+var rateCount = document.getElementById("rateCount");
+var rateTotal = document.getElementById("rateTotal");
+var ratePct = document.getElementById("ratePct");
+var rateBarFill = document.getElementById("rateBarFill");
+
+function src(track, id){
+  var s = splitId(id);
+  return "audio/" + (s.trackOverride || track) + "/" + s.bare + ".wav";
+}
+
+// ---- Web Audio playback ----
+// HTMLMediaElement.play() calls made from an async callback (e.g. a timer
+// fired after the previous clip's "ended" event) lose the original click's
+// user-activation and are silently blocked in some sandboxed/strict-autoplay
+// environments - this showed up as "no sound, F/J do nothing" in real use.
+// Web Audio API nodes don't have that per-call gating once the AudioContext
+// itself has been created/resumed inside a real click handler, so both clips
+// of a pair are decoded up front and scheduled with precise start times.
+var audioCtx = null;
+var bufferCache = {};
+var audioErrorEl = document.getElementById("audioError");
+
+// Nodes already .start()-ed keep sounding even after playToken is bumped -
+// the token only stops *future* UI/callback work, not audio already playing.
+// Replaying mid-pair (Space) or auto-advancing to the next trial while an
+// older pair is still ringing caused two clips to overlap. Stop whatever is
+// currently scheduled/playing before starting anything new.
+var activeSources = [];
+function stopActiveSources(){
+  activeSources.forEach(function(n){ try{ n.stop(); }catch(e){} });
+  activeSources = [];
+}
+
+function ensureCtx(){
+  if (!audioCtx){
+    var Ctor = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new Ctor();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+function loadBuffer(url){
+  if (bufferCache[url]) return bufferCache[url];
+  var p = fetch(url)
+    .then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status + " for " + url);
+      return r.arrayBuffer();
+    })
+    .then(function(arr){ return ensureCtx().decodeAudioData(arr); });
+  bufferCache[url] = p;
+  return p;
+}
+
+function showAudioError(err){
+  var en = document.documentElement.getAttribute("data-lang") === "en";
+  audioErrorEl.style.display = "block";
+  audioErrorEl.textContent = (en
+    ? "Couldn't load/play audio (" + (err && err.message ? err.message : err) + "). Try reloading the page."
+    : "เล่น/โหลดเสียงไม่ได้ (" + (err && err.message ? err.message : err) + ") ลองโหลดหน้าใหม่ดู");
+}
+
+function clearAudioError(){
+  audioErrorEl.style.display = "none";
+  audioErrorEl.textContent = "";
+}
+
+function updateProgress(){
+  progressTotal.textContent = trials.length;
+  progressCount.textContent = Math.min(idx, trials.length);
+  var pct = Math.round(100 * Math.min(idx, trials.length) / trials.length);
+  progressPct.textContent = pct + "%";
+  barFill.style.width = pct + "%";
+}
+
+function clearSlots(){
+  slotLeft.classList.remove("playing","chosen");
+  slotRight.classList.remove("playing","chosen");
+}
+
+function setupTrial(){
+  clearSlots();
+  canAnswer = false;
+  btnReplay.disabled = true;
+  if (idx >= trials.length){
+    phase = "pairwise-done";
+    pairCard.style.display = "none";
+    advanceToRatingOrDone();
+    return;
+  }
+  phase = "pairwise";
+  doneCard.style.display = "none";
+  rateCard.style.display = "none";
+  pairCard.style.display = "";
+  updateProgress();
+}
+
+function advanceToRatingOrDone(){
+  // The matched (word-vs-beep) track reuses the same 16 cells already rated
+  // under the word/beep tracks - skip straight to done, no separate rating pass.
+  if (track === "matched" || ratingIdx >= ratingOrder.length){
+    phase = "done";
+    pairCard.style.display = "none";
+    rateCard.style.display = "none";
+    doneCard.style.display = "block";
+    return;
+  }
+  setupRating();
+}
+
+function updateRateProgress(){
+  rateTotal.textContent = ratingOrder.length;
+  rateCount.textContent = Math.min(ratingIdx, ratingOrder.length);
+  var pct = Math.round(100 * Math.min(ratingIdx, ratingOrder.length) / ratingOrder.length);
+  ratePct.textContent = pct + "%";
+  rateBarFill.style.width = pct + "%";
+}
+
+function renderRateItems(){
+  var en = document.documentElement.getAttribute("data-lang") === "en";
+  rateItemsEl.innerHTML = "";
+  RATING_ITEMS.forEach(function(item){
+    var wrap = document.createElement("div");
+    wrap.className = "rate-item";
+    var q = document.createElement("div");
+    q.className = "rate-q";
+    q.textContent = en ? item.en : item.th;
+    wrap.appendChild(q);
+    var scale = document.createElement("div");
+    scale.className = "rate-scale";
+    for (var v = 1; v <= 5; v++){
+      (function(val){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "rate-btn" + (currentRatingSel[item.key] === val ? " sel" : "");
+        b.textContent = String(val);
+        b.addEventListener("click", function(){
+          currentRatingSel[item.key] = val;
+          renderRateItems();
+          checkRateNextEnabled();
+        });
+        scale.appendChild(b);
+      })(v);
+    }
+    wrap.appendChild(scale);
+    var labels = document.createElement("div");
+    labels.className = "rate-endlabels";
+    var l1 = document.createElement("span"), l2 = document.createElement("span");
+    l1.textContent = en ? "strongly disagree" : "ไม่เห็นด้วยเลย";
+    l2.textContent = en ? "strongly agree" : "เห็นด้วยมาก";
+    labels.appendChild(l1); labels.appendChild(l2);
+    wrap.appendChild(labels);
+    rateItemsEl.appendChild(wrap);
+  });
+}
+
+function checkRateNextEnabled(){
+  var allRated = RATING_ITEMS.every(function(item){ return currentRatingSel[item.key] != null; });
+  btnRateNext.disabled = !(allRated && ratingHasPlayed);
+}
+
+function setupRating(){
+  phase = "rating";
+  pairCard.style.display = "none";
+  doneCard.style.display = "none";
+  rateCard.style.display = "";
+  currentRatingSel = {};
+  ratingHasPlayed = false;
+  rateSlot.classList.remove("playing");
+  btnRateReplay.disabled = true;
+  btnRateNext.disabled = true;
+  renderRateItems();
+  updateRateProgress();
+}
+
+function playSingle(){
+  // ensureCtx() MUST run synchronously here, inside the click handler's own
+  // call stack - once we fall into the fetch/decode .then() below, the
+  // browser's user-activation window has already expired and context
+  // creation/resume would silently fail in strict-autoplay environments.
+  var ctx = ensureCtx();
+  stopActiveSources();
+  ratingPlayToken++;
+  var myToken = ratingPlayToken;
+  clearAudioError();
+  var url = src(track, ratingOrder[ratingIdx]);
+  loadBuffer(url).then(function(buf){
+    if (myToken !== ratingPlayToken) return;
+    rateSlot.classList.add("playing");
+    var node = ctx.createBufferSource();
+    node.buffer = buf;
+    node.connect(ctx.destination);
+    activeSources.push(node);
+    node.onended = function(){
+      if (myToken !== ratingPlayToken) return;
+      rateSlot.classList.remove("playing");
+      btnRateReplay.disabled = false;
+      ratingHasPlayed = true;
+      checkRateNextEnabled();
+    };
+    node.start();
+  }).catch(function(err){
+    if (myToken !== ratingPlayToken) return;
+    rateSlot.classList.remove("playing");
+    showAudioError(err);
+  });
+}
+
+function playPair(){
+  // Same reasoning as playSingle(): create/resume the AudioContext
+  // synchronously, inside this click handler's call stack, before the
+  // async fetch+decode chain below.
+  var ctx = ensureCtx();
+  stopActiveSources();
+  playToken++;
+  var myToken = playToken;
+  clearSlots();
+  clearAudioError();
+  canAnswer = false;
+  btnReplay.disabled = true;
+  var t = trials[idx];
+  var leftUrl = src(track, t.left), rightUrl = src(track, t.right);
+  Promise.all([loadBuffer(leftUrl), loadBuffer(rightUrl)]).then(function(bufs){
+    if (myToken !== playToken) return;
+    var leftBuf = bufs[0], rightBuf = bufs[1];
+    var leftNode = ctx.createBufferSource();
+    leftNode.buffer = leftBuf;
+    leftNode.connect(ctx.destination);
+    var startTime = ctx.currentTime;
+    var gapSec = 0.3;
+    var rightStartTime = startTime + leftBuf.duration + gapSec;
+
+    var rightNode = ctx.createBufferSource();
+    rightNode.buffer = rightBuf;
+    rightNode.connect(ctx.destination);
+    activeSources.push(leftNode, rightNode);
+
+    slotLeft.classList.add("playing");
+    leftNode.onended = function(){
+      if (myToken !== playToken) return;
+      slotLeft.classList.remove("playing");
+    };
+    leftNode.start(startTime);
+
+    setTimeout(function(){
+      if (myToken !== playToken) return;
+      slotRight.classList.add("playing");
+    }, Math.max(0, (leftBuf.duration + gapSec) * 1000));
+
+    rightNode.onended = function(){
+      if (myToken !== playToken) return;
+      slotRight.classList.remove("playing");
+      canAnswer = true;
+      btnReplay.disabled = false;
+      rightEndedAt = performance.now();
+    };
+    rightNode.start(rightStartTime);
+  }).catch(function(err){
+    if (myToken !== playToken) return;
+    clearSlots();
+    showAudioError(err);
+  });
+}
+
+function choose(side, rtMs){
+  if (!canAnswer || idx >= trials.length) return;
+  var t = trials[idx];
+  var chosenId = side === "left" ? t.left : t.right;
+  (side === "left" ? slotLeft : slotRight).classList.add("chosen");
+  var ci = cellInfo(chosenId), li = cellInfo(t.left), ri = cellInfo(t.right);
+  var entry = {
+    trial: idx, left_id: t.left, right_id: t.right,
+    left_track: splitId(t.left).trackOverride || track,
+    right_track: splitId(t.right).trackOverride || track,
+    left_dur_ratio: li.dur_ratio, left_semitone: li.semitone,
+    right_dur_ratio: ri.dur_ratio, right_semitone: ri.semitone,
+    choice_side: side, choice_id: chosenId,
+    choice_track: splitId(chosenId).trackOverride || track,
+    choice_dur_ratio: ci.dur_ratio, choice_semitone: ci.semitone,
+    // RT: time from both sounds finishing to the keypress that chose - a slower RT,
+    // per the preference-strength / drift-diffusion literature (e.g. Konovalov &
+    // Krajbich 2019), tends to mark a closer/more ambivalent call rather than a
+    // clear-cut one; treat it as a confidence proxy, not a weakness score itself.
+    rt_ms: rtMs != null ? Math.round(rtMs) : null,
+    // hold_ms: how long the F/J key was held down (keydown -> keyup). Filled in
+    // asynchronously by the keyup handler below once the viewer releases the key.
+    hold_ms: null,
+    ts: new Date().toISOString()
+  };
+  results.push(entry);
+  lastChoiceResult = entry;
+  saveResults(track, results);
+  canAnswer = false;
+  idx++;
+  setTimeout(function(){
+    setupTrial();
+    if (idx < trials.length) playPair();
+  }, 450);
+}
+
+btnStart.addEventListener("click", function(){
+  if (idx >= trials.length) return;
+  playPair();
+});
+btnReplay.addEventListener("click", function(){
+  if (idx >= trials.length) return;
+  playPair();
+});
+
+btnRatePlay.addEventListener("click", function(){ playSingle(); });
+btnRateReplay.addEventListener("click", function(){ playSingle(); });
+
+btnRateNext.addEventListener("click", function(){
+  if (btnRateNext.disabled) return;
+  var cellId = ratingOrder[ratingIdx];
+  var ci = cellInfo(cellId);
+  var entry = {
+    rating_idx: ratingIdx, cell_id: cellId,
+    dur_ratio: ci.dur_ratio, semitone: ci.semitone,
+    intentional: currentRatingSel.intentional,
+    struggling: currentRatingSel.struggling,
+    emotionality: currentRatingSel.emotionality,
+    ts: new Date().toISOString()
+  };
+  ratings.push(entry);
+  saveRatings(track, ratings);
+  ratingIdx++;
+  advanceToRatingOrDone();
+});
+
+document.addEventListener("keydown", function(e){
+  if (e.repeat) return;
+  var k = e.key.toLowerCase();
+  if (phase === "pairwise"){
+    if (k === "f" || k === "j"){
+      if (!canAnswer) return;
+      var now = performance.now();
+      pendingKeyDownAt = now;
+      pendingSide = k === "f" ? "left" : "right";
+      choose(pendingSide, rightEndedAt != null ? now - rightEndedAt : null);
+    } else if (k === " "){
+      e.preventDefault();
+      if (idx < trials.length) playPair();
+    }
+  } else if (phase === "rating"){
+    if (k === " "){
+      e.preventDefault();
+      playSingle();
+    }
+  }
+});
+
+document.addEventListener("keyup", function(e){
+  var k = e.key.toLowerCase();
+  if (k !== "f" && k !== "j") return;
+  var side = k === "f" ? "left" : "right";
+  if (lastChoiceResult && lastChoiceResult.hold_ms == null && pendingSide === side && pendingKeyDownAt != null){
+    lastChoiceResult.hold_ms = Math.round(performance.now() - pendingKeyDownAt);
+    saveResults(track, results);
+  }
+});
+
+var exportStatus = document.createElement("p");
+exportStatus.className = "hint";
+exportStatus.style.minHeight = "1.2em";
+btnExport.insertAdjacentElement("afterend", exportStatus);
+
+function buildCsv(){
+  var demo = loadDemo() || {};
+  var cols = ["age","gender","pet","hearing","trial","left_id","right_id","left_track","right_track","left_dur_ratio","left_semitone","right_dur_ratio","right_semitone","choice_side","choice_id","choice_track","choice_dur_ratio","choice_semitone","rt_ms","hold_ms","ts"];
+  var lines = [cols.join(",")];
+  results.forEach(function(r){
+    r.age = demo.age; r.gender = demo.gender; r.pet = demo.pet; r.hearing = demo.hearing;
+    lines.push(cols.map(function(c){ return r[c]; }).join(","));
+  });
+  return lines.join("\n");
+}
+
+function buildRatingsCsv(){
+  var demo = loadDemo() || {};
+  var cols = ["age","gender","pet","hearing","rating_idx","cell_id","dur_ratio","semitone","intentional","struggling","emotionality","ts"];
+  var lines = [cols.join(",")];
+  ratings.forEach(function(r){
+    r.age = demo.age; r.gender = demo.gender; r.pet = demo.pet; r.hearing = demo.hearing;
+    lines.push(cols.map(function(c){ return r[c]; }).join(","));
+  });
+  return lines.join("\n");
+}
+
+async function exportCsv(csv, fname, en){
+  try{
+    var downloads = await window.claude?.use?.("downloads");
+    if (downloads){
+      await downloads.save({ filename: fname, data: csv });
+      exportStatus.textContent = en ? "Saved." : "บันทึกแล้ว";
+      return;
+    }
+  } catch(e){}
+  try{
+    await navigator.clipboard.writeText(csv);
+    exportStatus.textContent = en ? "Download isn't available here — CSV copied to clipboard instead, paste it into a file." : "ดาวน์โหลดตรงไม่ได้ในนี้ — คัดลอก CSV ไปคลิปบอร์ดแทนแล้ว เอาไปวางในไฟล์ได้เลย";
+  } catch(e){
+    exportStatus.textContent = en ? "Couldn't export automatically. Open the browser console and read the variable instead." : "export อัตโนมัติไม่ได้ ลองเปิด console แล้วดูตัวแปรแทน";
+  }
+}
+
+btnExport.addEventListener("click", function(){
+  var en = document.documentElement.getAttribute("data-lang") === "en";
+  exportCsv(buildCsv(), "pairwise_" + track + "_" + Date.now() + ".csv", en);
+});
+
+btnExportRatings.addEventListener("click", function(){
+  var en = document.documentElement.getAttribute("data-lang") === "en";
+  exportCsv(buildRatingsCsv(), "ratings_" + track + "_" + Date.now() + ".csv", en);
+});
+
+btnReset.addEventListener("click", function(){
+  var msg = document.documentElement.getAttribute("data-lang") === "en"
+    ? "Clear all answers (pairwise + ratings) for this track?" : "ล้างคำตอบทั้งหมด (คู่เทียบ+ให้คะแนน) ของแทร็กนี้?";
+  if (!confirm(msg)) return;
+  localStorage.removeItem(lsKey(track, "trials"));
+  localStorage.removeItem(lsKey(track, "results"));
+  localStorage.removeItem(lsKey(track, "rate_order"));
+  localStorage.removeItem(lsKey(track, "ratings"));
+  trials = loadOrInitTrials(track);
+  results = [];
+  idx = 0;
+  ratingOrder = loadOrInitRatingOrder(track);
+  ratings = [];
+  ratingIdx = 0;
+  setupTrial();
+});
+
+document.querySelectorAll(".tab").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    document.querySelectorAll(".tab").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    track = btn.dataset.track;
+    trials = loadOrInitTrials(track);
+    results = loadResults(track);
+    idx = results.length;
+    ratingOrder = loadOrInitRatingOrder(track);
+    ratings = loadRatings(track);
+    ratingIdx = ratings.length;
+    setupTrial();
+  });
+});
+
+function applyTabLabels(){
+  var en = document.documentElement.getAttribute("data-lang") === "en";
+  document.querySelectorAll(".tab").forEach(function(btn){
+    btn.textContent = en ? btn.dataset.enLabel : btn.dataset.thLabel;
+  });
+}
+
+// Generic sweep for every element carrying BOTH data-th and data-en directly
+// (buttons, <option>, <label>, table cells, single-line <p>/<h2>) as opposed to
+// the nested-<span data-th>/<span data-en> pattern used for inline sentences.
+// Bug fixed 2026-11-09: the CSS rule `[data-en]{display:none}` used to match
+// these dual-attribute elements too, hiding every such button/option/label by
+// default (TH mode, since data-lang is never initialized on load) - the CSS
+// now excludes `:not([data-th])` so only true single-attribute spans get
+// toggled by display, and this function handles the dual-attribute ones by
+// swapping textContent instead.
+function applyDualLabels(){
+  var en = document.documentElement.getAttribute("data-lang") === "en";
+  document.querySelectorAll("[data-th][data-en]").forEach(function(el){
+    el.textContent = en ? el.dataset.en : el.dataset.th;
+  });
+}
+
+document.getElementById("langToggle").addEventListener("click", function(){
+  var cur = document.documentElement.getAttribute("data-lang");
+  var next = cur === "en" ? "th" : "en";
+  document.documentElement.setAttribute("data-lang", next);
+  this.textContent = next === "en" ? "TH" : "EN";
+  applyTabLabels();
+  applyDualLabels();
+  if (phase === "rating") renderRateItems();
+});
+
+applyTabLabels();
+applyDualLabels();
+
+setupTrial();
+})();
+</script>
+</body>
+</html>
