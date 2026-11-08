@@ -67,15 +67,8 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
   <div class="card" id="demoCard">
     <div class="scenario" id="demoTitle">ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)</div>
     <div class="demo-row">
-      <label id="lblAge">ช่วงอายุ</label>
-      <select class="demo-sel" id="demoAge">
-        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
-        <option value="18-29">18–29</option>
-        <option value="30-39">30–39</option>
-        <option value="40-49">40–49</option>
-        <option value="50-64">50–64</option>
-        <option value="65+">65+</option>
-      </select>
+      <label id="lblAge">อายุ (ปี)</label>
+      <input class="demo-sel" id="demoAge" type="number" inputmode="numeric" min="10" max="100" step="1" placeholder="เช่น 24">
     </div>
     <div class="demo-row">
       <label id="lblGender">เพศ</label>
@@ -97,6 +90,10 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
         <option value="small" data-th="สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)" data-en="Small animal (rabbit, guinea pig, hamster…)" data-ja="小動物（ウサギ、モルモット、ハムスターなど）">สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)</option>
         <option value="other" data-th="อื่นๆ" data-en="Other" data-ja="その他">อื่นๆ</option>
       </select>
+    </div>
+    <div class="demo-row" id="rowPetOther" style="display:none">
+      <label id="lblPetOther">ระบุ (ไม่บังคับ)</label>
+      <input class="demo-sel" id="demoPetOther" type="text" maxlength="60">
     </div>
     <div class="demo-row">
       <label id="lblHearing">มีปัญหาการได้ยินที่ทราบมั้ย</label>
@@ -197,9 +194,11 @@ var STR = {
     ja: "音を1組ずつ比較します。F（左）とJ（右）を聞いて、より「助けに行きたい」と感じた方を選んでください。氏名・メールアドレス・国籍は収集しません。"
   },
   demoTitle: { th: "ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)", en: "Before you start — a few general questions (no name, email, or nationality collected)", ja: "開始前に — 一般的な質問です（氏名・メール・国籍は収集しません）" },
-  lblAge: { th: "ช่วงอายุ", en: "Age group", ja: "年齢層" },
+  lblAge: { th: "อายุ (ปี)", en: "Age (years)", ja: "年齢" },
   lblGender: { th: "เพศ", en: "Gender", ja: "性別" },
   lblPet: { th: "เคยเลี้ยงสัตว์มั้ย", en: "Ever kept a pet?", ja: "ペットを飼ったことがありますか？" },
+  lblPetOther: { th: "ระบุ (ไม่บังคับ)", en: "Please specify (optional)", ja: "具体的に（任意）" },
+  demoAgePlaceholder: { th: "เช่น 24", en: "e.g. 24", ja: "例：24" },
   lblHearing: { th: "มีปัญหาการได้ยินที่ทราบมั้ย", en: "Known hearing difficulty?", ja: "聴覚に関して自覚している困難はありますか？" },
   btnDemoContinue: { th: "เริ่มทำแบบทดสอบ", en: "Start", ja: "開始する" },
   demoHint: { th: "เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้", en: "Fill in every field to continue", ja: "全て選択してから開始してください" },
@@ -222,6 +221,8 @@ function applyLang(){
   document.getElementById("pLede").textContent = STR.lede[lang];
   document.getElementById("demoTitle").textContent = STR.demoTitle[lang];
   document.getElementById("lblAge").textContent = STR.lblAge[lang];
+  document.getElementById("demoAge").placeholder = STR.demoAgePlaceholder[lang];
+  document.getElementById("lblPetOther").textContent = STR.lblPetOther[lang];
   document.getElementById("lblGender").textContent = STR.lblGender[lang];
   document.getElementById("lblPet").textContent = STR.lblPet[lang];
   document.getElementById("lblHearing").textContent = STR.lblHearing[lang];
@@ -256,12 +257,18 @@ var demoCard = document.getElementById("demoCard");
 var mainArea = document.getElementById("mainArea");
 var demoAge = document.getElementById("demoAge"), demoGender = document.getElementById("demoGender");
 var demoPet = document.getElementById("demoPet"), demoHearing = document.getElementById("demoHearing");
+var demoPetOther = document.getElementById("demoPetOther"), rowPetOther = document.getElementById("rowPetOther");
 var demoHint = document.getElementById("demoHint");
 
 function showMainArea(){ demoCard.style.display = "none"; mainArea.style.display = ""; }
 
+demoPet.addEventListener("change", function(){
+  rowPetOther.style.display = demoPet.value === "other" ? "" : "none";
+});
+
 document.getElementById("btnDemoContinue").addEventListener("click", function(){
-  var d = { age: demoAge.value, gender: demoGender.value, pet: demoPet.value, hearing: demoHearing.value, group: GROUP };
+  var age = parseInt(demoAge.value, 10);
+  var d = { age: (age >= 10 && age <= 100) ? age : "", gender: demoGender.value, pet: demoPet.value, pet_other: demoPetOther.value.trim(), hearing: demoHearing.value, group: GROUP };
   if (!d.age || !d.gender || !d.pet || !d.hearing){
     demoHint.style.color = "var(--accent)";
     demoHint.textContent = STR.demoHint[lang];
@@ -525,12 +532,12 @@ document.addEventListener("keyup", function(e){
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwOGe0H54xyPRZeY_-gCE3Xl0nL2UOFM1b1wZTOsAq9R4mWKdE24cDDQHc3KixjAdMTgA/exec";
 
 var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","rt_ms","hold_ms","ts"];
-var RANKING_COLS = ["pid","group","cond","age","gender","pet","hearing","rank","id","dur","pitch","contour"];
+var RANKING_COLS = ["pid","group","cond","age","gender","pet","pet_other","hearing","rank","id","dur","pitch","contour"];
 
 function rankingRows(){
   var demo = loadDemo() || {};
   return (finalRanking || []).map(function(r){
-    return { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, hearing: demo.hearing, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
+    return { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, pet_other: demo.pet_other || "", hearing: demo.hearing, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
   });
 }
 function toCsv(cols, rows){
@@ -582,6 +589,8 @@ applyLang();
 if (existingDemo){
   demoAge.value = existingDemo.age || ""; demoGender.value = existingDemo.gender || "";
   demoPet.value = existingDemo.pet || ""; demoHearing.value = existingDemo.hearing || "";
+  demoPetOther.value = existingDemo.pet_other || "";
+  rowPetOther.style.display = existingDemo.pet === "other" ? "" : "none";
   showMainArea();
 }
 if (finalRanking){ finishStudy(); } else { setupTrial(); }
