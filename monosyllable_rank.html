@@ -36,7 +36,19 @@ p.lede{color:var(--muted);font-size:14.5px;margin:6px 0 20px;max-width:62ch}
 .scenario{font-size:13.5px;color:var(--muted);font-style:italic;margin-bottom:4px}
 .question{font-size:18px;font-weight:600;text-align:center;margin:10px 0 20px}
 .stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-.slot{border:2px solid var(--border);border-radius:16px;padding:22px 10px;text-align:center;transition:border-color .15s,background .15s}
+.slot{border:2px solid var(--border);border-radius:16px;padding:22px 10px;text-align:center;transition:border-color .15s,background .15s,transform .1s;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.slot.disabled{cursor:default;opacity:.55}
+.slot:active:not(.disabled){transform:scale(.97)}
+.ratebox{border:2px solid var(--border);border-radius:16px;padding:20px 14px;text-align:center;margin-bottom:14px;transition:border-color .15s,background .15s;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.ratebox.playing{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--card))}
+.ratebox .key{font-family:"EB Garamond",Georgia,serif;font-size:34px;font-weight:600;line-height:1;color:var(--accent)}
+.ratebox .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.rate-item{margin:16px 0}
+.rate-q{font-size:14px;font-weight:600;margin-bottom:10px;text-align:center}
+.rate-scale{display:flex;gap:6px;justify-content:center}
+.rate-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.rate-btn.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.rate-endlabels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:4px;max-width:250px;margin-inline:auto}
 .slot.playing{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--card))}
 .slot .key{font-family:"EB Garamond",Georgia,serif;font-size:40px;font-weight:600;line-height:1}
 .slot.f .key{color:var(--f)}
@@ -121,21 +133,41 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
       <div class="bar"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
 
       <div class="stage">
-        <div class="slot f" id="slotLeft">
+        <div class="slot f disabled" id="slotLeft" role="button" tabindex="0" aria-label="left">
           <div class="key">F</div>
           <div class="sub" id="subLeft">ซ้าย</div>
         </div>
-        <div class="slot j" id="slotRight">
+        <div class="slot j disabled" id="slotRight" role="button" tabindex="0" aria-label="right">
           <div class="key">J</div>
           <div class="sub" id="subRight">ขวา</div>
         </div>
       </div>
 
       <div class="controls">
-        <button class="ctl primary" id="btnStart">เริ่ม / เล่นคู่นี้</button>
-        <button class="ctl" id="btnReplay" disabled>เล่นซ้ำ (Space)</button>
+        <button class="ctl primary" id="btnStart">เล่น / เล่นซ้ำ (แตะ หรือกด Space)</button>
       </div>
       <p class="hint" id="pHint">กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น</p>
+    </div>
+
+    <div class="card" id="rateCard" style="display:none">
+      <div class="scenario" id="rateStepLabel">ขั้นที่ 2 — ให้คะแนนเสียงนี้ทีละเสียง (ไม่เทียบคู่แล้ว)</div>
+      <div class="progress-row">
+        <span><span id="rateCount">0</span> / <span id="rateTotal">20</span> <span id="rateUnit">เสียง</span></span>
+        <span id="ratePct">0%</span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="rateBarFill" style="width:0%"></div></div>
+
+      <div class="ratebox" id="rateSlot" role="button" tabindex="0">
+        <div class="key">▶</div>
+        <div class="sub" id="rateSub">เสียงนี้</div>
+      </div>
+
+      <div id="rateItems"></div>
+
+      <div class="controls">
+        <button class="ctl primary" id="btnRateNext" disabled>ถัดไป</button>
+      </div>
+      <p class="hint" id="rateHint">ฟังก่อนอย่างน้อย 1 ครั้ง (แตะกล่อง หรือกด Space) แล้วให้คะแนนครบทุกข้อ ถึงจะกด "ถัดไป" ได้</p>
     </div>
 
     <div class="card" id="doneCard" style="display:none">
@@ -143,14 +175,23 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
         <h2 id="doneTitle">เสร็จสิ้นแล้ว — ขอบคุณ</h2>
         <p class="hint" id="doneBody">คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้</p>
       </div>
+      <div class="demo-row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <label id="lblComment" style="flex:none">มีคู่ไหนที่รู้สึกเฉยๆ ไม่อยากเลือกเลยมั้ย เล่าได้ (ไม่บังคับ)</label>
+        <textarea id="demoComment" rows="3" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--ink);border-radius:10px;padding:8px 10px;font-family:inherit;font-size:14px;resize:vertical"></textarea>
+      </div>
+      <div class="controls">
+        <button class="ctl primary" id="btnSubmitComment">ส่งความคิดเห็น</button>
+      </div>
+      <p class="hint" id="commentSentHint" style="display:none"></p>
+      <div class="controls" id="fallbackExport" style="display:none">
+        <button class="ctl" id="btnExport">Export CSV (comparisons)</button>
+        <button class="ctl" id="btnExportRanking">Export CSV (ranking)</button>
+        <button class="ctl" id="btnExportRatings">Export CSV (sada_ratings)</button>
+      </div>
+      <p class="hint" id="fallbackExportHint" style="display:none;color:var(--accent)"></p>
     </div>
 
-    <div class="controls">
-      <button class="ctl" id="btnExport">Export CSV (comparisons)</button>
-      <button class="ctl" id="btnExportRanking">Export CSV (ranking)</button>
-    </div>
-
-    <p class="footnote" id="fnDesign">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม</p>
+    <p class="footnote" id="fnDesign">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม — หลัง ranking เสร็จ มีขั้นที่ 2 ให้คะแนนทีละเสียง (ครบทั้ง 20 เสียง) ด้วย 5 ข้อที่ดัดแปลงจาก Sada, Yamagiwa &amp; Okada (2016, HIS Vol.18 No.3:221-230)'s 20-item/5-factor weak-robot scale - เฉพาะปัจจัย intentional stance (Q4, Q5) และ social display (Q8, Q9, Q10) ที่ battery เดิมของเราไม่ครอบคลุม ส่วน Q1-Q3/Q11-Q20 ตัดออกเพราะซ้ำกับ item ที่มีอยู่แล้ว (alive/sad/help_want/need_help) และ Q6-Q7 ตัดออกเพราะผูกกับวัตถุ (ขยะ) ที่ไม่มีใน stimulus เสียงล้วนของเรา</p>
   </div>
 </div>
 
@@ -207,12 +248,40 @@ var STR = {
   progressUnit: { th: "คู่ (โดยประมาณ)", en: "pairs (approx.)", ja: "ペア（概算）" },
   subLeft: { th: "ซ้าย", en: "left", ja: "左" },
   subRight: { th: "ขวา", en: "right", ja: "右" },
-  btnStart: { th: "เริ่ม / เล่นคู่นี้", en: "Start / play this pair", ja: "開始 / このペアを再生" },
-  btnReplay: { th: "เล่นซ้ำ (Space)", en: "Replay (Space)", ja: "もう一度 (Space)" },
-  pHint: { th: "กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "<b>F</b> = choose left &nbsp;·&nbsp; <b>J</b> = choose right &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>F</b> = 左を選択 &nbsp;·&nbsp; <b>J</b> = 右を選択 &nbsp;·&nbsp; 両方再生後のみ選択できます" },
+  btnStart: { th: "เล่น / เล่นซ้ำ (แตะ หรือกด Space)", en: "Play / Replay (tap, or press Space)", ja: "再生 / もう一度（タップ、または Space）" },
+  pHint: { th: "แตะกล่องซ้าย/ขวา หรือกด <b>F</b>/<b>J</b> บนคีย์บอร์ด &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "Tap the left/right box, or press <b>F</b>/<b>J</b> on a keyboard &nbsp;·&nbsp; you can answer only after both have played", ja: "左右のボックスをタップ、またはキーボードの<b>F</b>/<b>J</b> &nbsp;·&nbsp; 両方再生後のみ選択できます" },
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
   doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
+  fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the buttons below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
+  fallbackFailed: { th: "ส่งข้อมูลอัตโนมัติไม่สำเร็จ (อินเทอร์เน็ตอาจมีปัญหา) — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยแทน", en: "Automatic submission failed (possible connection issue) - use the buttons below to download your data and send it to the researcher instead.", ja: "自動送信に失敗しました（通信エラーの可能性）— 下のボタンでデータをダウンロードし、研究者に送ってください。" },
+  lblComment: { th: "มีคู่ไหนที่รู้สึกเฉยๆ ไม่อยากเลือกเลยมั้ย เล่าได้ (ไม่บังคับ)", en: "Were there pairs where you felt neutral, not really wanting either? Tell us here (optional)", ja: "どちらも選びたくないと感じたペアはありましたか？よければ教えてください（任意）" },
+  btnSubmitComment: { th: "ส่งความคิดเห็น", en: "Submit comment", ja: "コメントを送信" },
+  commentSent: { th: "ขอบคุณสำหรับความคิดเห็น", en: "Thanks for the comment", ja: "コメントをありがとうございます" },
+  rateStepLabel: { th: "ขั้นที่ 2 — ให้คะแนนเสียงนี้ทีละเสียง (ไม่เทียบคู่แล้ว)", en: "Step 2 — rate this sound on its own (no more pairs)", ja: "ステップ2 — この音を単独で評価してください（比較はもう終わりです）" },
+  rateUnit: { th: "เสียง", en: "sounds", ja: "音" },
+  rateSub: { th: "เสียงนี้", en: "this sound", ja: "この音" },
+  btnRateNext: { th: "ถัดไป", en: "Next", ja: "次へ" },
+  rateHint: { th: "ฟังก่อนอย่างน้อย 1 ครั้ง (แตะกล่อง หรือกด Space) แล้วให้คะแนนครบทุกข้อ ถึงจะกด \"ถัดไป\" ได้", en: "Listen at least once (tap the box, or press Space), then rate every item before \"Next\" unlocks", ja: "少なくとも1回再生してから（ボックスをタップ、または Space）、すべての項目を評価すると「次へ」が押せます" },
+  rateEndLow: { th: "ไม่เลย", en: "Not at all", ja: "全くそう思わない" },
+  rateEndHigh: { th: "มากที่สุด", en: "Very much", ja: "非常にそう思う" },
 };
+
+// 5 items adapted from Sada, Yamagiwa & Okada (2016, HIS Vol.18 No.3:221-230)'s
+// validated 20-item/5-factor scale for a weak human-dependent robot - Q4/Q5
+// (intentional stance) and Q8/Q9/Q10 (social display), the two factors this
+// project's own battery (Okada 2024 + BIAS map + Batson + Cowen + Anikin&Reby)
+// doesn't cover. Q1-Q3 (animacy), Q11-Q14 (cooperativity) and Q15-Q20
+// (emotionality) were left out as redundant with existing items (alive, sad,
+// help_want, need_help). Q6/Q7 (also intentional-stance in the source) were
+// dropped entirely - they ask whether the robot "noticed/wanted the trash",
+// which doesn't transfer to an audio-only stimulus with no visible object.
+var RATING_ITEMS = [
+  { key: "q4_purpose", th: "หุ่นยนต์ดูเหมือนมีเป้าหมาย", en: "The robot seemed to have a purpose", ja: "ロボットは目的を持っているようだった" },
+  { key: "q5_wanted", th: "รู้ว่าหุ่นยนต์อยากทำอะไร", en: "I understood what the robot wanted to do", ja: "ロボットが何をしたいかわかった" },
+  { key: "q8_trying", th: "หุ่นยนต์ดูพยายามอยู่", en: "The robot seemed to be trying hard", ja: "ロボットは頑張っているようだった" },
+  { key: "q9_trouble", th: "หุ่นยนต์ดูลำบาก", en: "The robot seemed to be in trouble", ja: "ロボットは困っているようだった" },
+  { key: "q10_problem", th: "หุ่นยนต์ดูเหมือนมีปัญหา", en: "The robot seemed to have a problem", ja: "ロボットは問題を抱えているようだった" },
+];
 
 function applyLang(){
   document.documentElement.setAttribute("lang", lang);
@@ -234,10 +303,17 @@ function applyLang(){
   document.getElementById("subLeft").textContent = STR.subLeft[lang];
   document.getElementById("subRight").textContent = STR.subRight[lang];
   document.getElementById("btnStart").textContent = STR.btnStart[lang];
-  document.getElementById("btnReplay").textContent = STR.btnReplay[lang];
   document.getElementById("pHint").innerHTML = STR.pHint[lang];
   document.getElementById("doneTitle").textContent = STR.doneTitle[lang];
   document.getElementById("doneBody").textContent = STR.doneBody[lang];
+  document.getElementById("lblComment").textContent = STR.lblComment[lang];
+  document.getElementById("rateStepLabel").textContent = STR.rateStepLabel[lang];
+  document.getElementById("rateUnit").textContent = STR.rateUnit[lang];
+  document.getElementById("rateSub").textContent = STR.rateSub[lang];
+  document.getElementById("btnRateNext").textContent = STR.btnRateNext[lang];
+  document.getElementById("rateHint").textContent = STR.rateHint[lang];
+  if (typeof renderRateItems === "function" && ratingPhaseActive) renderRateItems();
+  document.getElementById("btnSubmitComment").textContent = STR.btnSubmitComment[lang];
   document.querySelectorAll("#demoCard option, #demoCard select option").forEach(function(opt){
     if (opt.dataset[lang] != null) opt.textContent = opt.dataset[lang];
   });
@@ -357,7 +433,11 @@ var N = ITEMS.length;
 var WORST_CASE = N * Math.ceil(Math.log2(N)) - Math.pow(2, Math.ceil(Math.log2(N))) + 1;
 document.getElementById("progressTotal").textContent = "~" + WORST_CASE;
 
-var seedRnd = mulberry32(parseInt(PID.split("").reduce(function(a, c){ return a + c.charCodeAt(0); }, 0) * 2654435761 % 1e9, 10) || 12345);
+function seedFromPid(offset){
+  var base = PID.split("").reduce(function(a, c){ return a + c.charCodeAt(0); }, 0) * 2654435761 % 1e9;
+  return (base || 12345) + (offset || 0);
+}
+var seedRnd = mulberry32(seedFromPid(0));
 var shuffledIds = shuffle(ITEMS.map(function(it){ return it.id; }), seedRnd);
 
 var RESULTS_KEY = "mono_rank_results_v1_" + GROUP + "_" + COND;
@@ -396,7 +476,7 @@ function loadBuffer(url){
 }
 
 var slotLeft = document.getElementById("slotLeft"), slotRight = document.getElementById("slotRight");
-var btnStart = document.getElementById("btnStart"), btnReplay = document.getElementById("btnReplay");
+var btnStart = document.getElementById("btnStart");
 var pairCard = document.getElementById("pairCard"), doneCard = document.getElementById("doneCard");
 var progressCount = document.getElementById("progressCount"), progressPct = document.getElementById("progressPct"), barFill = document.getElementById("barFill");
 var canAnswer = false, rightEndedAt = null, pendingSide = null, pendingKeyDownAt = null, lastChoiceResult = null;
@@ -404,6 +484,11 @@ var activeSources = [];
 
 function stopActiveSources(){ activeSources.forEach(function(s){ try { s.stop(); } catch(e){} }); activeSources = []; }
 function clearSlots(){ slotLeft.classList.remove("playing", "chosen"); slotRight.classList.remove("playing", "chosen"); }
+function setCanAnswer(v){
+  canAnswer = v;
+  slotLeft.classList.toggle("disabled", !v);
+  slotRight.classList.toggle("disabled", !v);
+}
 
 function updateProgress(){
   progressCount.textContent = trialIdx;
@@ -414,14 +499,134 @@ function updateProgress(){
 
 function finishStudy(){
   pairCard.style.display = "none";
+  rateCard.style.display = "none";
   doneCard.style.display = "block";
   saveFinalRanking(finalRanking);
 }
 
+// ---- Rating phase (Step 2): rate all 20 stimuli individually on the 5 items
+// adapted from Sada et al. 2016 - runs after the pairwise ranking is done. ----
+var rateCard = document.getElementById("rateCard");
+var rateSlot = document.getElementById("rateSlot");
+var rateCount = document.getElementById("rateCount"), ratePct = document.getElementById("ratePct"), rateBarFill = document.getElementById("rateBarFill");
+var btnRateNext = document.getElementById("btnRateNext");
+var ratingPhaseActive = false;
+var ratingOrder = [], ratingIdx = 0, ratings = [], currentRatingSel = {}, ratePlayed = false;
+
+var RATE_ORDER_KEY = "mono_rank_rate_order_v1_" + GROUP + "_" + COND;
+var RATINGS_KEY = "mono_rank_ratings_v1_" + GROUP + "_" + COND;
+function loadOrInitRatingOrder(){
+  var raw = localStorage.getItem(RATE_ORDER_KEY);
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  var order = shuffle(ITEMS.map(function(it){ return it.id; }), mulberry32(seedFromPid() + 777));
+  localStorage.setItem(RATE_ORDER_KEY, JSON.stringify(order));
+  return order;
+}
+function loadRatings(){ var raw = localStorage.getItem(RATINGS_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return []; }
+function saveRatings(){ localStorage.setItem(RATINGS_KEY, JSON.stringify(ratings)); }
+
+function renderRateItems(){
+  var el = document.getElementById("rateItems");
+  el.innerHTML = "";
+  RATING_ITEMS.forEach(function(item){
+    var wrap = document.createElement("div");
+    wrap.className = "rate-item";
+    var q = document.createElement("div");
+    q.className = "rate-q";
+    q.textContent = item[lang];
+    wrap.appendChild(q);
+    var scale = document.createElement("div");
+    scale.className = "rate-scale";
+    for (var v = 1; v <= 5; v++){
+      (function(v){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "rate-btn" + (currentRatingSel[item.key] === v ? " sel" : "");
+        b.textContent = v;
+        b.addEventListener("click", function(){
+          currentRatingSel[item.key] = v;
+          renderRateItems();
+          checkRateNextEnabled();
+        });
+        scale.appendChild(b);
+      })(v);
+    }
+    wrap.appendChild(scale);
+    var endlabels = document.createElement("div");
+    endlabels.className = "rate-endlabels";
+    endlabels.innerHTML = "<span>" + STR.rateEndLow[lang] + "</span><span>" + STR.rateEndHigh[lang] + "</span>";
+    wrap.appendChild(endlabels);
+    el.appendChild(wrap);
+  });
+}
+
+function checkRateNextEnabled(){
+  var allSet = RATING_ITEMS.every(function(item){ return currentRatingSel[item.key] != null; });
+  btnRateNext.disabled = !(allSet && ratePlayed);
+}
+
+function updateRateProgress(){
+  rateCount.textContent = ratingIdx;
+  var pct = Math.min(100, Math.round((ratingIdx / ITEMS.length) * 100));
+  ratePct.textContent = pct + "%";
+  rateBarFill.style.width = pct + "%";
+}
+
+function playSingle(){
+  var id = ratingOrder[ratingIdx];
+  stopActiveSources();
+  clearAudioError();
+  loadBuffer(src(id)).then(function(buf){
+    var ctx = ensureCtx();
+    var s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination);
+    s.start(ctx.currentTime + 0.03);
+    activeSources = [s];
+    rateSlot.classList.add("playing");
+    setTimeout(function(){
+      rateSlot.classList.remove("playing");
+      ratePlayed = true;
+      checkRateNextEnabled();
+    }, buf.duration * 1000 + 30);
+  }).catch(function(err){ showAudioError(err); });
+}
+
+function setupRating(){
+  currentRatingSel = {};
+  ratePlayed = false;
+  btnRateNext.disabled = true;
+  renderRateItems();
+  updateRateProgress();
+}
+
+function startRatingPhase(){
+  ratingPhaseActive = true;
+  ratingOrder = loadOrInitRatingOrder();
+  ratings = loadRatings();
+  ratingIdx = ratings.length;
+  pairCard.style.display = "none";
+  if (ratingIdx >= ITEMS.length){ finishStudy(); return; }
+  rateCard.style.display = "block";
+  setupRating();
+}
+
+rateSlot.addEventListener("click", function(){ playSingle(); });
+rateSlot.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); playSingle(); } });
+
+btnRateNext.addEventListener("click", function(){
+  if (btnRateNext.disabled) return;
+  var id = ratingOrder[ratingIdx];
+  var it = ITEM_BY_ID[id];
+  var entry = { pid: PID, group: GROUP, cond: COND, rating_idx: ratingIdx, id: id, dur: it.dur, pitch: it.pitch, contour: it.contour, ts: new Date().toISOString() };
+  RATING_ITEMS.forEach(function(item){ entry[item.key] = currentRatingSel[item.key]; });
+  ratings.push(entry);
+  saveRatings();
+  ratingIdx++;
+  if (ratingIdx >= ITEMS.length){ finishStudy(); } else { setupRating(); }
+});
+
 function setupTrial(){
   clearSlots();
-  canAnswer = false;
-  btnReplay.disabled = true;
+  setCanAnswer(false);
   rightEndedAt = null;
   updateProgress();
 }
@@ -433,8 +638,7 @@ function playPair(){
   clearSlots();
   stopActiveSources();
   clearAudioError();
-  canAnswer = false;
-  btnReplay.disabled = true;
+  setCanAnswer(false);
   var startAt;
   Promise.all([loadBuffer(src(leftId)), loadBuffer(src(rightId))]).then(function(bufs){
     var ctx = ensureCtx();
@@ -451,8 +655,7 @@ function playPair(){
     setTimeout(function(){
       slotRight.classList.remove("playing");
       rightEndedAt = performance.now();
-      canAnswer = true;
-      btnReplay.disabled = false;
+      setCanAnswer(true);
     }, (bufs[0].duration + gap + bufs[1].duration) * 1000);
     window.__pairLeftId = leftId; window.__pairRightId = rightId;
   }).catch(function(err){ showAudioError(err); });
@@ -477,7 +680,7 @@ function choose(side, rtMs){
   results.push(entry);
   lastChoiceResult = entry;
   saveResults(results);
-  canAnswer = false;
+  setCanAnswer(false);
   trialIdx++;
   // side === "left" means the left item is preferred -> comparator returns
   // -1 (left sorts first) when left was chosen, 1 otherwise.
@@ -487,7 +690,8 @@ function choose(side, rtMs){
     if (genState.done){
       finalRanking = genState.value.map(function(id, idx){ var it = ITEM_BY_ID[id]; return { rank: idx + 1, id: id, dur: it.dur, pitch: it.pitch, contour: it.contour }; });
       updateProgress();
-      finishStudy();
+      saveFinalRanking(finalRanking);
+      startRatingPhase();
     } else {
       setupTrial();
       playPair();
@@ -495,8 +699,20 @@ function choose(side, rtMs){
   }, 450);
 }
 
+// Tap-to-choose, for phones (no F/J keyboard). Keyboard still works too.
+function tapChoose(side){
+  if (!canAnswer) return;
+  var now = performance.now();
+  choose(side, rightEndedAt != null ? now - rightEndedAt : null);
+}
+slotLeft.addEventListener("click", function(){ tapChoose("left"); });
+slotRight.addEventListener("click", function(){ tapChoose("right"); });
+// Enter only (not Space) on a focused slot - Space is already the global
+// replay shortcut below, and binding it here too would fire both at once.
+slotLeft.addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); tapChoose("left"); } });
+slotRight.addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); tapChoose("right"); } });
+
 btnStart.addEventListener("click", function(){ if (!genState.done) playPair(); });
-btnReplay.addEventListener("click", function(){ if (!genState.done) playPair(); });
 
 document.addEventListener("keydown", function(e){
   if (e.repeat) return;
@@ -533,6 +749,7 @@ var GAS_URL = "https://script.google.com/macros/s/AKfycbwOGe0H54xyPRZeY_-gCE3Xl0
 
 var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","rt_ms","hold_ms","ts"];
 var RANKING_COLS = ["pid","group","cond","age","gender","pet","pet_other","hearing","rank","id","dur","pitch","contour"];
+var RATING_COLS = ["pid","group","cond","rating_idx","id","dur","pitch","contour","q4_purpose","q5_wanted","q8_trying","q9_trouble","q10_problem","ts"];
 
 function rankingRows(){
   var demo = loadDemo() || {};
@@ -570,16 +787,43 @@ async function exportCsv(csv, fname){
 }
 document.getElementById("btnExport").addEventListener("click", function(){ exportCsv(toCsv(COMPARISON_COLS, results), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
 document.getElementById("btnExportRanking").addEventListener("click", function(){ exportCsv(toCsv(RANKING_COLS, rankingRows()), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+document.getElementById("btnExportRatings").addEventListener("click", function(){ exportCsv(toCsv(RATING_COLS, ratings), "mono_rank_sada_ratings_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+
+var COMMENT_COLS = ["pid","group","cond","comment","ts"];
+document.getElementById("btnSubmitComment").addEventListener("click", async function(){
+  var text = document.getElementById("demoComment").value.trim();
+  var hintEl = document.getElementById("commentSentHint");
+  if (!text) return;
+  var row = { pid: PID, group: GROUP, cond: COND, comment: text, ts: new Date().toISOString() };
+  var ok = GAS_URL ? await submitToSheet("comments", COMMENT_COLS, [row]) : false;
+  if (!ok) { await exportCsv(toCsv(COMMENT_COLS, [row]), "mono_rank_comment_" + GROUP + "_" + COND + "_" + PID + ".csv"); }
+  hintEl.style.display = "block";
+  hintEl.textContent = STR.commentSent[lang];
+  this.disabled = true;
+});
 
 // Auto-submit on completion if the Apps Script Web App URL is configured;
 // falls back to nothing silently if GAS_URL is empty (pilot mode) - the
 // manual export buttons above still work either way.
+// The Export CSV buttons are hidden by default (not shown to participants at
+// all) - they only appear as a fallback if the automatic Google Sheets
+// submission fails, or if GAS_URL was never configured (pilot mode).
 var origFinish = finishStudy;
-finishStudy = function(){
+finishStudy = async function(){
   origFinish();
-  if (GAS_URL){
-    submitToSheet("comparisons", COMPARISON_COLS, results);
-    submitToSheet("ranking", RANKING_COLS, rankingRows());
+  var fallback = document.getElementById("fallbackExport");
+  var fallbackHint = document.getElementById("fallbackExportHint");
+  if (!GAS_URL){
+    fallback.style.display = ""; fallbackHint.style.display = "block";
+    fallbackHint.textContent = STR.fallbackPilot[lang];
+    return;
+  }
+  var ok1 = await submitToSheet("comparisons", COMPARISON_COLS, results);
+  var ok2 = await submitToSheet("ranking", RANKING_COLS, rankingRows());
+  var ok3 = await submitToSheet("sada_ratings", RATING_COLS, ratings);
+  if (!ok1 || !ok2 || !ok3){
+    fallback.style.display = ""; fallbackHint.style.display = "block";
+    fallbackHint.textContent = STR.fallbackFailed[lang];
   }
 };
 
@@ -593,7 +837,7 @@ if (existingDemo){
   rowPetOther.style.display = existingDemo.pet === "other" ? "" : "none";
   showMainArea();
 }
-if (finalRanking){ finishStudy(); } else { setupTrial(); }
+if (finalRanking){ startRatingPhase(); } else { setupTrial(); }
 })();
 </script>
 </body>
