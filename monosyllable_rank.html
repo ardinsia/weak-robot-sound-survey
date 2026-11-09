@@ -63,6 +63,10 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
 .done{text-align:center;padding:30px 10px}
 .done h2{font-size:22px;margin:0 0 8px}
 .footnote{font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:4px}
+.consent-p{font-size:13.5px;line-height:1.6;margin:10px 0}
+.consent-check{display:flex;align-items:flex-start;gap:10px;margin:18px 0 6px;font-size:13.5px}
+.consent-check input{margin-top:3px;width:18px;height:18px;flex:0 0 auto}
+.consent-decline{font-size:12px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
@@ -76,7 +80,25 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
   <p id="groupWarn" class="warn" style="display:none"></p>
   <p id="audioError" class="hint" style="display:none;color:var(--accent);font-weight:600"></p>
 
-  <div class="card" id="demoCard">
+  <div class="card" id="consentCard">
+    <div class="scenario" id="consentTitle">แบบฟอร์มยินยอมเข้าร่วมงานวิจัย</div>
+    <p class="consent-p" id="consentPurpose"></p>
+    <p class="consent-p" id="consentProcedure"></p>
+    <p class="consent-p" id="consentRisksBenefits"></p>
+    <p class="consent-p" id="consentData"></p>
+    <p class="consent-p" id="consentVoluntary"></p>
+    <p class="consent-p" id="consentContact"></p>
+    <label class="consent-check">
+      <input type="checkbox" id="consentCheckbox">
+      <span id="consentAgreeLabel">ฉันได้อ่านและเข้าใจข้อมูลข้างต้น และยินยอมเข้าร่วมงานวิจัยนี้โดยสมัครใจ</span>
+    </label>
+    <div class="controls">
+      <button class="ctl primary" id="btnConsentContinue" disabled>ยินยอม — เริ่มทำแบบสอบถาม</button>
+    </div>
+    <p class="consent-decline" id="consentDeclineHint">หากไม่ยินยอม ไม่ต้องทำอะไรต่อ ปิดหน้านี้ได้เลย</p>
+  </div>
+
+  <div class="card" id="demoCard" style="display:none">
     <div class="scenario" id="demoTitle">ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)</div>
     <div class="demo-row">
       <label id="lblAge">อายุ (ปี)</label>
@@ -115,16 +137,36 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
         <option value="yes" data-th="มี" data-en="Yes" data-ja="あり">มี</option>
       </select>
     </div>
+    <div class="demo-row">
+      <label id="lblDevice">ฟังด้วยอะไร</label>
+      <select class="demo-sel" id="demoDevice">
+        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
+        <option value="headphones" data-th="หูฟัง/เอียร์บัด" data-en="Headphones / earbuds" data-ja="ヘッドホン/イヤホン">หูฟัง/เอียร์บัด</option>
+        <option value="speakers" data-th="ลำโพงในตัว (มือถือ/คอม)" data-en="Built-in speakers (phone/computer)" data-ja="内蔵スピーカー（スマホ/PC）">ลำโพงในตัว (มือถือ/คอม)</option>
+        <option value="other" data-th="อื่นๆ/ไม่แน่ใจ" data-en="Other / not sure" data-ja="その他/わからない">อื่นๆ/ไม่แน่ใจ</option>
+      </select>
+    </div>
+    <div class="demo-row" style="flex-direction:column;align-items:stretch;gap:8px">
+      <label id="lblSoundCheck" style="flex:none">ทดสอบเสียงก่อนเริ่ม — ปรับระดับเสียงให้ได้ยินชัด</label>
+      <div class="controls" style="justify-content:flex-start;margin-bottom:0">
+        <button type="button" class="ctl" id="btnSoundCheck">▶ ฟังเสียงทดสอบ</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);cursor:pointer">
+        <input type="checkbox" id="soundCheckConfirm" style="width:16px;height:16px;flex:0 0 auto">
+        <span id="lblSoundCheckConfirm">ฉันได้ยินเสียงทดสอบชัดเจนแล้ว</span>
+      </label>
+    </div>
     <div class="controls">
       <button class="ctl primary" id="btnDemoContinue">เริ่มทำแบบทดสอบ</button>
     </div>
-    <p class="hint" id="demoHint">เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้</p>
+    <p class="hint" id="demoHint">เลือกให้ครบทุกข้อ และฟังเสียงทดสอบก่อนถึงจะเริ่มได้</p>
   </div>
 
   <div id="mainArea" style="display:none">
     <div class="card" id="pairCard">
       <div class="scenario" id="pScenario">สถานการณ์: หุ่นยนต์ทำงานต่อไม่ได้ และกำลังร้องเรียกคุณอยู่</div>
       <div class="question" id="pQuestion">เสียงไหนทำให้คุณ "อยากเข้าไปช่วย" มากกว่ากัน?</div>
+      <p class="hint" id="trialNotice" style="display:none;font-weight:600;color:var(--accent)"></p>
 
       <div class="progress-row">
         <span><span id="progressCount">0</span> / <span id="progressTotal">~69</span> <span id="progressUnit">คู่ (โดยประมาณ)</span></span>
@@ -191,7 +233,7 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
       <p class="hint" id="fallbackExportHint" style="display:none;color:var(--accent)"></p>
     </div>
 
-    <p class="footnote" id="fnDesign">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม — หลัง ranking เสร็จ มีขั้นที่ 2 ให้คะแนนทีละเสียง (ครบทั้ง 20 เสียง) ด้วย 5 ข้อที่ดัดแปลงจาก Sada, Yamagiwa &amp; Okada (2016, HIS Vol.18 No.3:221-230)'s 20-item/5-factor weak-robot scale - เฉพาะปัจจัย intentional stance (Q4, Q5) และ social display (Q8, Q9, Q10) ที่ battery เดิมของเราไม่ครอบคลุม ส่วน Q1-Q3/Q11-Q20 ตัดออกเพราะซ้ำกับ item ที่มีอยู่แล้ว (alive/sad/help_want/need_help) และ Q6-Q7 ตัดออกเพราะผูกกับวัตถุ (ขยะ) ที่ไม่มีใน stimulus เสียงล้วนของเรา</p>
+    <p class="footnote" id="fnDesign">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม — หลัง ranking เสร็จ มีขั้นที่ 2 ให้คะแนนทีละเสียง (ครบทั้ง 20 เสียง) ด้วย 5 ข้อที่ดัดแปลงจาก Sada, Yamagiwa &amp; Okada (2016, HIS Vol.18 No.3:221-230)'s 20-item/5-factor weak-robot scale - เฉพาะปัจจัย intentional stance (Q4, Q5) และ social display (Q8, Q9, Q10) ที่ battery เดิมของเราไม่ครอบคลุม ส่วน Q1-Q3/Q11-Q20 ตัดออกเพราะซ้ำกับ item ที่มีอยู่แล้ว (alive/sad/help_want/need_help) และ Q6-Q7 ตัดออกเพราะผูกกับวัตถุ (ขยะ) ที่ไม่มีใน stimulus เสียงล้วนของเรา — เพิ่มเติมเพื่อความแน่นของข้อมูล: (1) มีคู่ฝึกใช้งาน 1 คู่ก่อนเริ่มนับจริง ไม่เก็บข้อมูล (2) มีคู่ instructed-response catch trial แทรกไว้กลางชุด (ให้เลือกฝั่งซ้ายตามคำสั่งเพื่อตรวจว่าอ่านคำแนะนำอยู่จริง ไม่ใช่กดมั่ว) บันทึกแยกจาก ranking (3) เก็บชนิดอุปกรณ์ฟัง (หูฟัง/ลำโพง) และให้ฟังเสียงทดสอบก่อนเริ่ม เพื่อ control confound จากอุปกรณ์ (4) ตำแหน่งซ้าย/ขวาของแต่ละคู่สุ่ม 50/50 ทุกครั้งที่เล่น เป็นอิสระจากลำดับภายในของ merge-sort comparator ไม่ใช่ตำแหน่งคงที่ตามโครงสร้างต้นไม้ (5) ข้อมูลการเทียบคู่ถูกส่งขึ้น Google Sheet เป็นช่วงๆ (ทุก 10 คู่ และตอนปิด/สลับแท็บ) ไม่ใช่รอจบครั้งเดียว เพื่อไม่ให้ข้อมูลหายหากออกกลางทาง</p>
   </div>
 </div>
 
@@ -241,15 +283,19 @@ var STR = {
   lblPetOther: { th: "ระบุ (ไม่บังคับ)", en: "Please specify (optional)", ja: "具体的に（任意）" },
   demoAgePlaceholder: { th: "เช่น 24", en: "e.g. 24", ja: "例：24" },
   lblHearing: { th: "มีปัญหาการได้ยินที่ทราบมั้ย", en: "Known hearing difficulty?", ja: "聴覚に関して自覚している困難はありますか？" },
+  lblDevice: { th: "ฟังด้วยอะไร", en: "Listening on?", ja: "何で聞いていますか？" },
+  lblSoundCheck: { th: "ทดสอบเสียงก่อนเริ่ม — ปรับระดับเสียงให้ได้ยินชัด", en: "Sound check before you start — adjust your volume until it's clearly audible", ja: "開始前の音声チェック — はっきり聞こえるように音量を調整してください" },
+  btnSoundCheck: { th: "▶ ฟังเสียงทดสอบ", en: "▶ Play test tone", ja: "▶ テスト音を再生" },
+  lblSoundCheckConfirm: { th: "ฉันได้ยินเสียงทดสอบชัดเจนแล้ว", en: "I heard the test tone clearly", ja: "テスト音をはっきりと聞きました" },
   btnDemoContinue: { th: "เริ่มทำแบบทดสอบ", en: "Start", ja: "開始する" },
-  demoHint: { th: "เลือกให้ครบทุกข้อก่อนถึงจะเริ่มได้", en: "Fill in every field to continue", ja: "全て選択してから開始してください" },
+  demoHint: { th: "เลือกให้ครบทุกข้อ และฟังเสียงทดสอบก่อนถึงจะเริ่มได้", en: "Fill in every field and listen to the test tone to continue", ja: "全て選択し、テスト音を聞いてから開始してください" },
   pScenario: { th: "สถานการณ์: หุ่นยนต์ทำงานต่อไม่ได้ และกำลังร้องเรียกคุณอยู่", en: "Scenario: a robot can't continue its task, and is calling out to you.", ja: "状況：ロボットが作業を続けられず、あなたに呼びかけています。" },
   pQuestion: { th: "เสียงไหนทำให้คุณ \"อยากเข้าไปช่วย\" มากกว่ากัน?", en: "Which sound makes you want to go help more?", ja: "どちらの音の方が助けに行きたくなりますか？" },
   progressUnit: { th: "คู่ (โดยประมาณ)", en: "pairs (approx.)", ja: "ペア（概算）" },
   subLeft: { th: "ซ้าย", en: "left", ja: "左" },
   subRight: { th: "ขวา", en: "right", ja: "右" },
   btnStart: { th: "เล่น / เล่นซ้ำ (แตะ หรือกด Space)", en: "Play / Replay (tap, or press Space)", ja: "再生 / もう一度（タップ、または Space）" },
-  pHint: { th: "แตะกล่องซ้าย/ขวา หรือกด <b>F</b>/<b>J</b> บนคีย์บอร์ด &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "Tap the left/right box, or press <b>F</b>/<b>J</b> on a keyboard &nbsp;·&nbsp; you can answer only after both have played", ja: "左右のボックスをタップ、またはキーボードの<b>F</b>/<b>J</b> &nbsp;·&nbsp; 両方再生後のみ選択できます" },
+  pHint: { th: "เลือกวิธีที่สะดวกตามอุปกรณ์: <b>คลิก/แตะ</b>กล่องซ้าย-ขวา หรือ <b>กด</b> <b>F</b> (ซ้าย)/<b>J</b> (ขวา) บนคีย์บอร์ด — เล่นเสียงด้วยการคลิก/แตะปุ่มเล่น หรือกด <b>Space</b> ก็ได้เหมือนกัน &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "Use whichever fits your device: <b>click/tap</b> the left/right box, or <b>press</b> <b>F</b> (left)/<b>J</b> (right) on a keyboard — and play the sound by clicking/tapping the Play button or pressing <b>Space</b>, either works &nbsp;·&nbsp; you can answer only after both have played", ja: "お使いの機器に合わせてどちらでも: 左右のボックスを<b>クリック/タップ</b>、またはキーボードの<b>F</b>（左）/<b>J</b>（右）を<b>押す</b> — 再生も再生ボタンのクリック/タップか<b>Space</b>キー、どちらでも同じです &nbsp;·&nbsp; 両方再生後のみ選択できます" },
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
   doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
   fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the buttons below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
@@ -264,6 +310,58 @@ var STR = {
   rateHint: { th: "ฟังก่อนอย่างน้อย 1 ครั้ง (แตะกล่อง หรือกด Space) แล้วให้คะแนนครบทุกข้อ ถึงจะกด \"ถัดไป\" ได้", en: "Listen at least once (tap the box, or press Space), then rate every item before \"Next\" unlocks", ja: "少なくとも1回再生してから（ボックスをタップ、または Space）、すべての項目を評価すると「次へ」が押せます" },
   rateEndLow: { th: "ไม่เลย", en: "Not at all", ja: "全くそう思わない" },
   rateEndHigh: { th: "มากที่สุด", en: "Very much", ja: "非常にそう思う" },
+  practiceNotice: {
+    th: "(ตัวอย่างฝึกใช้งาน — ไม่เก็บข้อมูลจริง) ฟังแล้วเลือกข้างใดก็ได้ เพื่อลองใช้ระบบก่อนเริ่มจริง",
+    en: "(Practice round — not recorded) Listen, then choose either side, just to try the interface before the real trials start",
+    ja: "（練習です — 記録されません）聞いてから、どちらでもよいので選んでください。本番前の操作確認です"
+  },
+  catchNotice: {
+    th: "ข้อนี้พิเศษ: ไม่ว่าฟังแล้วรู้สึกยังไง ให้เลือกฝั่งซ้าย (F) เพื่อยืนยันว่าคุณอ่านคำแนะนำและกำลังตั้งใจทำอยู่",
+    en: "This one is special: regardless of what you hear, please choose the LEFT option (F) — this confirms you're reading the instructions and paying attention",
+    ja: "この問題は特別です：聞いた内容に関わらず、左側（F）を選んでください — 指示を読み、注意して取り組んでいることを確認するためです"
+  },
+  consentTitle: { th: "แบบฟอร์มยินยอมเข้าร่วมงานวิจัย", en: "Research Participation Consent Form", ja: "研究参加同意書" },
+  consentPurpose: {
+    th: "<b>วัตถุประสงค์:</b> งานวิจัยนี้เป็นส่วนหนึ่งของวิทยานิพนธ์ปริญญาเอก (Tokyo Metropolitan University) ภายใต้การดูแลของศาสตราจารย์ Fukuchi เพื่อศึกษาว่าเสียงสังเคราะห์แบบต่างๆ ที่หุ่นยนต์เปล่งออกมา ทำให้ผู้ฟังรู้สึกอยากช่วยหุ่นยนต์มากน้อยต่างกันอย่างไร ผลการศึกษาจะนำไปเสนอในงานประชุมวิชาการ KST 2027",
+    en: "<b>Purpose:</b> This study is part of a PhD research project (Tokyo Metropolitan University), supervised by Prof. Fukuchi. It investigates how different synthetic robot sounds affect listeners' willingness to help a robot that appears to need assistance. Findings will be presented at the KST 2027 conference.",
+    ja: "<b>目的:</b> 本研究は首都大学東京（Tokyo Metropolitan University）における博士研究の一部であり、Fukuchi教授の指導の下で行われます。ロボットが発する様々な合成音が、聞き手が「助けたい」と感じる度合いにどのように影響するかを調査します。結果はKST 2027学会にて発表される予定です。"
+  },
+  consentProcedure: {
+    th: "<b>ขั้นตอน:</b> ท่านจะได้ฟังเสียงสังเคราะห์สั้นๆ ทีละคู่ แล้วเลือกเสียงที่ทำให้อยากช่วยมากกว่า (ประมาณ 60-70 คู่) จากนั้นจะได้ฟังเสียงเดิมทีละเสียงแล้วให้คะแนนความรู้สึกสั้นๆ 5 ข้อต่อเสียง (รวม 20 เสียง) ใช้เวลาทั้งหมดประมาณ 15-20 นาที แนะนำให้ใช้หูฟังในที่เงียบ",
+    en: "<b>Procedure:</b> You will listen to short synthetic sounds in pairs and choose which one makes you want to help more (about 60-70 pairs). Afterward, you will hear each of the 20 sounds individually and rate it on 5 short items. The whole study takes about 15-20 minutes. Headphones in a quiet place are recommended.",
+    ja: "<b>手順:</b> 短い合成音を2つずつ聞き、より「助けたい」と感じた方を選んでいただきます（約60〜70ペア）。その後、同じ20個の音を1つずつ聞き、それぞれについて5つの短い項目で評価していただきます。全体で約15〜20分かかります。静かな場所でヘッドホンの使用を推奨します。"
+  },
+  consentRisksBenefits: {
+    th: "<b>ความเสี่ยงและประโยชน์:</b> งานวิจัยนี้มีความเสี่ยงน้อยมาก อาจรู้สึกเมื่อยล้าจากการฟังเสียงต่อเนื่อง ท่านสามารถหยุดพักหรือออกจากการทำแบบสอบถามได้ตลอดเวลา ไม่มีค่าตอบแทน แต่ผลการศึกษาจะช่วยให้เข้าใจการออกแบบเสียงหุ่นยนต์ที่สื่อสารความต้องการความช่วยเหลือได้ดีขึ้น",
+    en: "<b>Risks and benefits:</b> This study carries minimal risk, aside from possible mild listening fatigue. You may pause or stop at any time. There is no compensation, but the findings will help improve the design of robot sounds that communicate a need for help.",
+    ja: "<b>リスクと利益:</b> 本研究のリスクは最小限ですが、聴取による多少の疲労を感じる可能性があります。いつでも中断・終了できます。報酬はありませんが、本研究の結果は援助を求めるロボットの音の設計改善に役立ちます。"
+  },
+  consentData: {
+    th: "<b>ข้อมูลและความเป็นส่วนตัว:</b> แบบสอบถามนี้ไม่เก็บชื่อ อีเมล หรือสัญชาติ เก็บเพียงอายุ เพศ ประสบการณ์เลี้ยงสัตว์ และสถานะการได้ยิน พร้อมคำตอบของท่าน ข้อมูลจะถูกส่งไปเก็บแบบไม่ระบุตัวตนใน Google Sheet ที่เข้าถึงได้เฉพาะผู้วิจัยและอาจารย์ที่ปรึกษา ใช้เพื่อการวิเคราะห์ทางวิชาการ การนำเสนอในที่ประชุม และการตีพิมพ์เท่านั้น",
+    en: "<b>Data and privacy:</b> This survey does not collect your name, email, or nationality — only age, gender, pet-ownership history, hearing status, and your responses. Data is submitted anonymously to a Google Sheet accessible only to the researcher and supervisor, and is used only for academic analysis, conference presentation, and publication.",
+    ja: "<b>データとプライバシー:</b> 本調査では氏名・メールアドレス・国籍は収集しません。収集するのは年齢、性別、ペット飼育経験、聴覚状況、および回答のみです。データは匿名化された状態で研究者と指導教員のみがアクセスできるGoogleスプレッドシートに送信され、学術分析・学会発表・論文発表のみに使用されます。"
+  },
+  consentVoluntary: {
+    th: "<b>ความสมัครใจ:</b> การเข้าร่วมเป็นไปโดยสมัครใจทั้งหมด ท่านสามารถปิดหน้านี้เพื่อยุติการเข้าร่วมเมื่อใดก็ได้ โดยไม่มีผลเสียใดๆ และสามารถเว้นข้อคิดเห็นปลายเปิดได้หากไม่ต้องการตอบ",
+    en: "<b>Voluntary participation:</b> Participation is entirely voluntary. You may close this page to withdraw at any time, with no penalty, and may skip the optional comment box.",
+    ja: "<b>自発的な参加:</b> 参加は完全に自発的です。いつでもこのページを閉じて参加を中止でき、不利益は一切ありません。任意のコメント欄は回答しなくても構いません。"
+  },
+  consentContact: {
+    th: "<b>ติดต่อผู้วิจัย:</b> หากมีคำถามเกี่ยวกับงานวิจัยนี้ ติดต่อได้ที่ pakpoomruj@gmail.com",
+    en: "<b>Contact:</b> For questions about this study, contact pakpoomruj@gmail.com",
+    ja: "<b>お問い合わせ:</b> 本研究に関するご質問は pakpoomruj@gmail.com までご連絡ください。"
+  },
+  consentAgreeLabel: {
+    th: "ฉันได้อ่านและเข้าใจข้อมูลข้างต้น และยินยอมเข้าร่วมงานวิจัยนี้โดยสมัครใจ",
+    en: "I have read and understood the above information, and I voluntarily agree to participate in this study.",
+    ja: "上記の内容を読み、理解した上で、本研究への参加に自発的に同意します。"
+  },
+  btnConsentContinue: { th: "ยินยอม — เริ่มทำแบบสอบถาม", en: "I Agree — Continue", ja: "同意する — 開始する" },
+  consentDeclineHint: {
+    th: "หากไม่ยินยอม ไม่ต้องทำอะไรต่อ ปิดหน้านี้ได้เลย",
+    en: "If you do not agree, simply close this page — no further action is needed.",
+    ja: "同意しない場合は、何もせずこのページを閉じてください。"
+  },
 };
 
 // 5 items adapted from Sada, Yamagiwa & Okada (2016, HIS Vol.18 No.3:221-230)'s
@@ -288,6 +386,16 @@ function applyLang(){
   document.getElementById("langToggle").textContent = LANG_NAMES[LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]];
   document.getElementById("hTitle").textContent = STR.title[lang];
   document.getElementById("pLede").textContent = STR.lede[lang];
+  document.getElementById("consentTitle").textContent = STR.consentTitle[lang];
+  document.getElementById("consentPurpose").innerHTML = STR.consentPurpose[lang];
+  document.getElementById("consentProcedure").innerHTML = STR.consentProcedure[lang];
+  document.getElementById("consentRisksBenefits").innerHTML = STR.consentRisksBenefits[lang];
+  document.getElementById("consentData").innerHTML = STR.consentData[lang];
+  document.getElementById("consentVoluntary").innerHTML = STR.consentVoluntary[lang];
+  document.getElementById("consentContact").innerHTML = STR.consentContact[lang];
+  document.getElementById("consentAgreeLabel").textContent = STR.consentAgreeLabel[lang];
+  document.getElementById("btnConsentContinue").textContent = STR.btnConsentContinue[lang];
+  document.getElementById("consentDeclineHint").textContent = STR.consentDeclineHint[lang];
   document.getElementById("demoTitle").textContent = STR.demoTitle[lang];
   document.getElementById("lblAge").textContent = STR.lblAge[lang];
   document.getElementById("demoAge").placeholder = STR.demoAgePlaceholder[lang];
@@ -295,6 +403,10 @@ function applyLang(){
   document.getElementById("lblGender").textContent = STR.lblGender[lang];
   document.getElementById("lblPet").textContent = STR.lblPet[lang];
   document.getElementById("lblHearing").textContent = STR.lblHearing[lang];
+  document.getElementById("lblDevice").textContent = STR.lblDevice[lang];
+  document.getElementById("lblSoundCheck").textContent = STR.lblSoundCheck[lang];
+  document.getElementById("btnSoundCheck").textContent = STR.btnSoundCheck[lang];
+  document.getElementById("lblSoundCheckConfirm").textContent = STR.lblSoundCheckConfirm[lang];
   document.getElementById("btnDemoContinue").textContent = STR.btnDemoContinue[lang];
   document.getElementById("demoHint").textContent = STR.demoHint[lang];
   document.getElementById("pScenario").textContent = STR.pScenario[lang];
@@ -313,6 +425,7 @@ function applyLang(){
   document.getElementById("btnRateNext").textContent = STR.btnRateNext[lang];
   document.getElementById("rateHint").textContent = STR.rateHint[lang];
   if (typeof renderRateItems === "function" && ratingPhaseActive) renderRateItems();
+  if (typeof updateTrialNotice === "function") updateTrialNotice();
   document.getElementById("btnSubmitComment").textContent = STR.btnSubmitComment[lang];
   document.querySelectorAll("#demoCard option, #demoCard select option").forEach(function(opt){
     if (opt.dataset[lang] != null) opt.textContent = opt.dataset[lang];
@@ -324,6 +437,26 @@ document.getElementById("langToggle").addEventListener("click", function(){
   applyLang();
 });
 
+// ---- Consent gate (standard informed-consent screen, shown once per browser) ----
+var CONSENT_KEY = "mono_rank_consent_v1_" + GROUP + "_" + COND;
+function loadConsent(){ return localStorage.getItem(CONSENT_KEY) === "1"; }
+function saveConsent(){ localStorage.setItem(CONSENT_KEY, "1"); }
+
+var consentCard = document.getElementById("consentCard");
+var consentCheckbox = document.getElementById("consentCheckbox");
+var btnConsentContinue = document.getElementById("btnConsentContinue");
+
+consentCheckbox.addEventListener("change", function(){
+  btnConsentContinue.disabled = !consentCheckbox.checked;
+});
+
+btnConsentContinue.addEventListener("click", function(){
+  if (!consentCheckbox.checked) return;
+  saveConsent();
+  consentCard.style.display = "none";
+  if (loadDemo()){ showMainArea(); } else { demoCard.style.display = ""; }
+});
+
 // ---- Demographics gate ----
 var DEMO_KEY = "mono_rank_demo_v1_" + GROUP + "_" + COND;
 function loadDemo(){ var raw = localStorage.getItem(DEMO_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return null; }
@@ -333,8 +466,10 @@ var demoCard = document.getElementById("demoCard");
 var mainArea = document.getElementById("mainArea");
 var demoAge = document.getElementById("demoAge"), demoGender = document.getElementById("demoGender");
 var demoPet = document.getElementById("demoPet"), demoHearing = document.getElementById("demoHearing");
+var demoDevice = document.getElementById("demoDevice");
 var demoPetOther = document.getElementById("demoPetOther"), rowPetOther = document.getElementById("rowPetOther");
 var demoHint = document.getElementById("demoHint");
+var soundCheckConfirm = document.getElementById("soundCheckConfirm");
 
 function showMainArea(){ demoCard.style.display = "none"; mainArea.style.display = ""; }
 
@@ -342,10 +477,25 @@ demoPet.addEventListener("change", function(){
   rowPetOther.style.display = demoPet.value === "other" ? "" : "none";
 });
 
+// Sound check: a short synthesized tone (no audio file needed) so a
+// participant can confirm their device/volume works before any real
+// stimulus is played - catches muted/broken-headphone sessions up front,
+// which otherwise silently produce noise data for the whole session.
+document.getElementById("btnSoundCheck").addEventListener("click", function(){
+  var ctx = ensureCtx();
+  var osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.type = "sine"; osc.frequency.value = 440;
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + 1.0);
+});
+
 document.getElementById("btnDemoContinue").addEventListener("click", function(){
   var age = parseInt(demoAge.value, 10);
-  var d = { age: (age >= 10 && age <= 100) ? age : "", gender: demoGender.value, pet: demoPet.value, pet_other: demoPetOther.value.trim(), hearing: demoHearing.value, group: GROUP };
-  if (!d.age || !d.gender || !d.pet || !d.hearing){
+  var d = { age: (age >= 10 && age <= 100) ? age : "", gender: demoGender.value, pet: demoPet.value, pet_other: demoPetOther.value.trim(), hearing: demoHearing.value, device: demoDevice.value, group: GROUP };
+  if (!d.age || !d.gender || !d.pet || !d.hearing || !d.device || !soundCheckConfirm.checked){
     demoHint.style.color = "var(--accent)";
     demoHint.textContent = STR.demoHint[lang];
     return;
@@ -440,6 +590,46 @@ function seedFromPid(offset){
 var seedRnd = mulberry32(seedFromPid(0));
 var shuffledIds = shuffle(ITEMS.map(function(it){ return it.id; }), seedRnd);
 
+// Browser/device fingerprint (no identifying info) - lets us tell apart, say,
+// mobile Safari autoplay glitches from genuinely odd responses when a
+// participant's data looks strange in analysis.
+var DEVICE_INFO = (function(){
+  var ua = navigator.userAgent || "";
+  var isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+  return (isMobile ? "mobile" : "desktop") + " | " + ua.slice(0, 140);
+})();
+
+// ---- Practice trial (unscored warm-up, shown once) ----
+// With ~69 real trials per participant and only ~10 participants per group,
+// losing trial 1 to "getting used to the interface" noise is expensive.
+// One throwaway practice pair using the two most acoustically extreme
+// stimuli (short/low/flat vs. long/high/fallrise) - any choice is fine, it
+// is never scored or sent anywhere.
+var PRACTICE_KEY = "mono_rank_practice_v1_" + GROUP + "_" + COND;
+function loadPracticeDone(){ return localStorage.getItem(PRACTICE_KEY) === "1"; }
+function savePracticeDone(){ localStorage.setItem(PRACTICE_KEY, "1"); }
+var practiceMode = !loadPracticeDone();
+var PRACTICE_PAIR = [ITEMS[0].id, ITEMS[ITEMS.length - 1].id];
+
+// ---- Instructed-response catch trial (data-quality check) ----
+// One instructed-response item (Oppenheimer, Meyvis & Davidenko 2009-style:
+// "pick LEFT no matter what you hear") inserted partway through the real
+// trials. Unlike the forced-choice preference trials themselves, this one
+// has a verifiable correct answer, so it is the only way this unsupervised
+// online study can flag inattentive/careless responding. Not fed into the
+// merge-sort comparator - logged separately, trialIdx does not advance for it.
+var CATCH_KEY = "mono_rank_catch_v1_" + GROUP + "_" + COND;
+function loadCatchDone(){ return localStorage.getItem(CATCH_KEY) === "1"; }
+function saveCatchDone(){ localStorage.setItem(CATCH_KEY, "1"); }
+var catchDone = loadCatchDone();
+var catchMode = false;
+var CATCH_PAIR = [ITEMS[1].id, ITEMS[ITEMS.length - 2].id];
+var CATCH_AT = Math.max(5, Math.floor(WORST_CASE / 2));
+var CATCH_RESULTS_KEY = "mono_rank_catchresults_v1_" + GROUP + "_" + COND;
+function loadCatchResults(){ var raw = localStorage.getItem(CATCH_RESULTS_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return []; }
+function saveCatchResults(r){ localStorage.setItem(CATCH_RESULTS_KEY, JSON.stringify(r)); }
+var catchResults = loadCatchResults();
+
 var RESULTS_KEY = "mono_rank_results_v1_" + GROUP + "_" + COND;
 var RANKING_KEY = "mono_rank_final_v1_" + GROUP + "_" + COND;
 function loadResults(){ var raw = localStorage.getItem(RESULTS_KEY); if (raw){ try { return JSON.parse(raw); } catch(e){} } return []; }
@@ -455,9 +645,14 @@ var genState = gen.next(); // first .value is a pair, or (if N<=1) done immediat
 // prompts (the generator is a pure function of its input array + the
 // comparison results it's fed), so a page reload mid-session can fast-forward
 // back to the current frontier instead of silently re-asking question 1.
+// Compare the stored winner's id against the generator's own first-slot id
+// (genState.value[0]), NOT the stored screen side - the display side is
+// randomized independently of the merge-sort comparator order (see
+// playCurrentPair), so screen-left does not always mean "generator-first".
 results.forEach(function(r){
   if (genState.done) return;
-  genState = gen.next(r.choice_side === "left" ? -1 : 1);
+  var a = genState.value[0];
+  genState = gen.next(r.choice_id === a ? -1 : 1);
 });
 var trialIdx = results.length;
 var finalRanking = loadFinalRanking();
@@ -476,6 +671,7 @@ function loadBuffer(url){
 }
 
 var slotLeft = document.getElementById("slotLeft"), slotRight = document.getElementById("slotRight");
+var trialNoticeEl = document.getElementById("trialNotice");
 var btnStart = document.getElementById("btnStart");
 var pairCard = document.getElementById("pairCard"), doneCard = document.getElementById("doneCard");
 var progressCount = document.getElementById("progressCount"), progressPct = document.getElementById("progressPct"), barFill = document.getElementById("barFill");
@@ -624,17 +820,38 @@ btnRateNext.addEventListener("click", function(){
   if (ratingIdx >= ITEMS.length){ finishStudy(); } else { setupRating(); }
 });
 
+function updateTrialNotice(){
+  if (practiceMode){ trialNoticeEl.style.display = "block"; trialNoticeEl.textContent = STR.practiceNotice[lang]; }
+  else if (catchMode){ trialNoticeEl.style.display = "block"; trialNoticeEl.textContent = STR.catchNotice[lang]; }
+  else { trialNoticeEl.style.display = "none"; }
+}
+
 function setupTrial(){
   clearSlots();
   setCanAnswer(false);
   rightEndedAt = null;
+  catchMode = (!practiceMode && !catchDone && trialIdx === CATCH_AT);
+  updateTrialNotice();
   updateProgress();
 }
 
-function playPair(){
+// Dispatches to whichever pair should play right now (practice / catch /
+// real), and for a real pair randomizes which item lands on-screen left (F)
+// vs. right (J) independently of the merge-sort comparator's internal
+// order - so the side a stimulus is heard on is not confounded with the
+// stimulus itself, and side preference ("counterbalanced left/right") can
+// honestly be reported in the methods section.
+function playCurrentPair(){
+  if (practiceMode){ window.__genA = null; playPair(PRACTICE_PAIR[0], PRACTICE_PAIR[1]); return; }
+  if (catchMode){ window.__genA = null; playPair(CATCH_PAIR[0], CATCH_PAIR[1]); return; }
   if (genState.done) return;
   var pair = genState.value;
-  var leftId = pair[0], rightId = pair[1];
+  var swap = Math.random() < 0.5;
+  window.__genA = pair[0];
+  playPair(swap ? pair[1] : pair[0], swap ? pair[0] : pair[1]);
+}
+
+function playPair(leftId, rightId){
   clearSlots();
   stopActiveSources();
   clearAudioError();
@@ -666,6 +883,39 @@ function choose(side, rtMs){
   var leftId = window.__pairLeftId, rightId = window.__pairRightId;
   var chosenId = side === "left" ? leftId : rightId;
   (side === "left" ? slotLeft : slotRight).classList.add("chosen");
+  setCanAnswer(false);
+
+  if (practiceMode){
+    pendingSide = null; pendingKeyDownAt = null;
+    setTimeout(function(){
+      practiceMode = false;
+      savePracticeDone();
+      setupTrial();
+      playCurrentPair();
+    }, 450);
+    return;
+  }
+
+  if (catchMode){
+    pendingSide = null; pendingKeyDownAt = null;
+    var correct = side === "left";
+    catchResults.push({
+      pid: PID, group: GROUP, cond: COND, trial_position: trialIdx,
+      expected_side: "left", chosen_side: side, correct: correct ? 1 : 0,
+      rt_ms: rtMs != null ? Math.round(rtMs) : null, ts: new Date().toISOString()
+    });
+    saveCatchResults(catchResults);
+    catchDone = true;
+    saveCatchDone();
+    if (GAS_URL) submitToSheet("catch_trial", CATCH_COLS, catchResults);
+    setTimeout(function(){
+      catchMode = false;
+      setupTrial();
+      playCurrentPair();
+    }, 450);
+    return;
+  }
+
   var li = ITEM_BY_ID[leftId], ri = ITEM_BY_ID[rightId];
   var entry = {
     pid: PID, group: GROUP, cond: COND, trial: trialIdx,
@@ -673,6 +923,8 @@ function choose(side, rtMs){
     left_dur: li.dur, left_pitch: li.pitch, left_contour: li.contour,
     right_dur: ri.dur, right_pitch: ri.pitch, right_contour: ri.contour,
     choice_side: side, choice_id: chosenId,
+    swapped: window.__genA != null && window.__genA !== leftId,
+    device_info: DEVICE_INFO,
     rt_ms: rtMs != null ? Math.round(rtMs) : null,
     hold_ms: null,
     ts: new Date().toISOString()
@@ -680,11 +932,11 @@ function choose(side, rtMs){
   results.push(entry);
   lastChoiceResult = entry;
   saveResults(results);
-  setCanAnswer(false);
   trialIdx++;
-  // side === "left" means the left item is preferred -> comparator returns
-  // -1 (left sorts first) when left was chosen, 1 otherwise.
-  var cmpResult = side === "left" ? -1 : 1;
+  if (results.length % 10 === 0) submitPendingComparisons();
+  // Comparator result is relative to the generator's own first-slot item
+  // (window.__genA), not the screen side - see playCurrentPair's swap.
+  var cmpResult = chosenId === window.__genA ? -1 : 1;
   setTimeout(function(){
     genState = gen.next(cmpResult);
     if (genState.done){
@@ -694,7 +946,7 @@ function choose(side, rtMs){
       startRatingPhase();
     } else {
       setupTrial();
-      playPair();
+      playCurrentPair();
     }
   }, 450);
 }
@@ -712,7 +964,7 @@ slotRight.addEventListener("click", function(){ tapChoose("right"); });
 slotLeft.addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); tapChoose("left"); } });
 slotRight.addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); tapChoose("right"); } });
 
-btnStart.addEventListener("click", function(){ if (!genState.done) playPair(); });
+btnStart.addEventListener("click", function(){ playCurrentPair(); });
 
 document.addEventListener("keydown", function(e){
   if (e.repeat) return;
@@ -725,7 +977,7 @@ document.addEventListener("keydown", function(e){
     choose(pendingSide, rightEndedAt != null ? now - rightEndedAt : null);
   } else if (k === " "){
     e.preventDefault();
-    if (!genState.done) playPair();
+    playCurrentPair();
   }
 });
 document.addEventListener("keyup", function(e){
@@ -747,14 +999,40 @@ document.addEventListener("keyup", function(e){
 // manual CSV download instead of an automatic submit).
 var GAS_URL = "https://script.google.com/macros/s/AKfycbwOGe0H54xyPRZeY_-gCE3Xl0nL2UOFM1b1wZTOsAq9R4mWKdE24cDDQHc3KixjAdMTgA/exec";
 
-var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","rt_ms","hold_ms","ts"];
-var RANKING_COLS = ["pid","group","cond","age","gender","pet","pet_other","hearing","rank","id","dur","pitch","contour"];
+var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","swapped","device_info","rt_ms","hold_ms","ts"];
+var RANKING_COLS = ["pid","group","cond","age","gender","pet","pet_other","hearing","device","device_info","rank","id","dur","pitch","contour"];
 var RATING_COLS = ["pid","group","cond","rating_idx","id","dur","pitch","contour","q4_purpose","q5_wanted","q8_trying","q9_trouble","q10_problem","ts"];
+var CATCH_COLS = ["pid","group","cond","trial_position","expected_side","chosen_side","correct","rt_ms","ts"];
+
+// ---- Incremental submission (don't wait for the very end) ----
+// finishStudy() only runs after a participant completes BOTH the full
+// ranking and all 20 ratings - if someone closes the tab partway through
+// (common for unsupervised remote testing), everything they did was
+// otherwise never sent anywhere. With only ~10 participants per group,
+// losing one mid-session is a real cost, so comparisons are also pushed
+// every 10 trials and on tab-hide/unload, tracking how much has already
+// been sent so the final submission in finishStudy doesn't duplicate rows.
+var SUBMITTED_KEY = "mono_rank_submitted_v1_" + GROUP + "_" + COND;
+function loadSubmittedCount(){ return parseInt(localStorage.getItem(SUBMITTED_KEY) || "0", 10) || 0; }
+function saveSubmittedCount(n){ localStorage.setItem(SUBMITTED_KEY, String(n)); }
+var submittedCount = loadSubmittedCount();
+async function submitPendingComparisons(){
+  if (!GAS_URL) return true;
+  if (results.length <= submittedCount) return true;
+  var pending = results.slice(submittedCount);
+  var ok = await submitToSheet("comparisons", COMPARISON_COLS, pending);
+  if (ok){ submittedCount = results.length; saveSubmittedCount(submittedCount); }
+  return ok;
+}
+document.addEventListener("visibilitychange", function(){
+  if (document.visibilityState === "hidden") submitPendingComparisons();
+});
+window.addEventListener("pagehide", function(){ submitPendingComparisons(); });
 
 function rankingRows(){
   var demo = loadDemo() || {};
   return (finalRanking || []).map(function(r){
-    return { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, pet_other: demo.pet_other || "", hearing: demo.hearing, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
+    return { pid: PID, group: GROUP, cond: COND, age: demo.age, gender: demo.gender, pet: demo.pet, pet_other: demo.pet_other || "", hearing: demo.hearing, device: demo.device, device_info: DEVICE_INFO, rank: r.rank, id: r.id, dur: r.dur, pitch: r.pitch, contour: r.contour };
   });
 }
 function toCsv(cols, rows){
@@ -772,7 +1050,8 @@ async function submitToSheet(sheetName, cols, rows){
     var res = await fetch(GAS_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ sheet: sheetName, columns: cols, rows: rows })
+      body: JSON.stringify({ sheet: sheetName, columns: cols, rows: rows }),
+      keepalive: true
     });
     return res.ok;
   } catch(e){ return false; }
@@ -818,24 +1097,30 @@ finishStudy = async function(){
     fallbackHint.textContent = STR.fallbackPilot[lang];
     return;
   }
-  var ok1 = await submitToSheet("comparisons", COMPARISON_COLS, results);
+  var ok1 = await submitPendingComparisons();
   var ok2 = await submitToSheet("ranking", RANKING_COLS, rankingRows());
   var ok3 = await submitToSheet("sada_ratings", RATING_COLS, ratings);
-  if (!ok1 || !ok2 || !ok3){
+  var ok4 = catchResults.length ? await submitToSheet("catch_trial", CATCH_COLS, catchResults) : true;
+  if (!ok1 || !ok2 || !ok3 || !ok4){
     fallback.style.display = ""; fallbackHint.style.display = "block";
     fallbackHint.textContent = STR.fallbackFailed[lang];
   }
 };
 
 // ---- Init ----
+var existingConsent = loadConsent();
 var existingDemo = loadDemo();
 applyLang();
 if (existingDemo){
   demoAge.value = existingDemo.age || ""; demoGender.value = existingDemo.gender || "";
   demoPet.value = existingDemo.pet || ""; demoHearing.value = existingDemo.hearing || "";
+  demoDevice.value = existingDemo.device || "";
   demoPetOther.value = existingDemo.pet_other || "";
   rowPetOther.style.display = existingDemo.pet === "other" ? "" : "none";
-  showMainArea();
+}
+if (existingConsent){
+  consentCard.style.display = "none";
+  if (existingDemo){ showMainArea(); } else { demoCard.style.display = ""; }
 }
 if (finalRanking){ startRatingPhase(); } else { setupTrial(); }
 })();
