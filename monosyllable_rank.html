@@ -911,6 +911,12 @@ function setupRating(){
   btnRateNext.disabled = true;
   renderRateItems();
   updateRateProgress();
+  // On mobile, after tapping "Next" the button stays in the same spot and
+  // just goes gray again - nothing on screen signals a new sound loaded
+  // unless the participant happens to scroll up themselves. Scroll back to
+  // the top of the rating card so the new sound/progress count is visible
+  // immediately instead of requiring them to discover it.
+  rateCard.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function startRatingPhase(){
