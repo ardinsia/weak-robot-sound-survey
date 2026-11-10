@@ -1094,24 +1094,27 @@ slotRight.addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.pre
 
 btnStart.addEventListener("click", function(){ playCurrentPair(); });
 
+// e.key is layout-dependent - on a Thai or Japanese keyboard layout the
+// physical F/J keys produce Thai/Japanese characters there, not "f"/"j", so
+// checking e.key silently never matched for those layouts. e.code reports
+// the physical key position instead (same "KeyF"/"KeyJ" regardless of the
+// active input language), so F/J work no matter what layout is active.
 document.addEventListener("keydown", function(e){
   if (e.repeat) return;
-  var k = e.key.toLowerCase();
-  if (k === "f" || k === "j"){
+  if (e.code === "KeyF" || e.code === "KeyJ"){
     if (!canAnswer) return;
     var now = performance.now();
     pendingKeyDownAt = now;
-    pendingSide = k === "f" ? "left" : "right";
+    pendingSide = e.code === "KeyF" ? "left" : "right";
     choose(pendingSide, rightEndedAt != null ? now - rightEndedAt : null);
-  } else if (k === " "){
+  } else if (e.code === "Space"){
     e.preventDefault();
     playCurrentPair();
   }
 });
 document.addEventListener("keyup", function(e){
-  var k = e.key.toLowerCase();
-  if (k !== "f" && k !== "j") return;
-  var side = k === "f" ? "left" : "right";
+  if (e.code !== "KeyF" && e.code !== "KeyJ") return;
+  var side = e.code === "KeyF" ? "left" : "right";
   if (lastChoiceResult && lastChoiceResult.hold_ms == null && pendingSide === side && pendingKeyDownAt != null){
     lastChoiceResult.hold_ms = Math.round(performance.now() - pendingKeyDownAt);
     saveResults(results);
