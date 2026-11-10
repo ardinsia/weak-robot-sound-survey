@@ -554,6 +554,7 @@ function saveDemo(d){ localStorage.setItem(DEMO_KEY, JSON.stringify(d)); }
 
 var demoCard = document.getElementById("demoCard");
 var mainArea = document.getElementById("mainArea");
+var pLedeEl = document.getElementById("pLede");
 var demoAge = document.getElementById("demoAge"), demoGender = document.getElementById("demoGender");
 var demoHearing = document.getElementById("demoHearing");
 var demoDevice = document.getElementById("demoDevice");
@@ -582,19 +583,20 @@ petChecks.forEach(function(chk){
   });
 });
 
-// Sound check: a short synthesized tone (no audio file needed) so a
-// participant can confirm their device/volume works before any real
-// stimulus is played - catches muted/broken-headphone sessions up front,
-// which otherwise silently produce noise data for the whole session.
+// Sound check: plays an actual stimulus (high pitch, long, risefall contour -
+// one of the louder/more attention-grabbing ones with a clear tone change)
+// instead of a generic 440Hz sine, so participants set their volume against
+// the real loudness/timbre they'll hear in the task, not an unrelated tone
+// that could be much quieter or softer-sounding than the real stimuli.
 document.getElementById("btnSoundCheck").addEventListener("click", function(){
-  var ctx = ensureCtx();
-  var osc = ctx.createOscillator(), gain = ctx.createGain();
-  osc.type = "sine"; osc.frequency.value = 440;
-  gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
-  osc.connect(gain); gain.connect(ctx.destination);
-  osc.start(); osc.stop(ctx.currentTime + 1.0);
+  stopActiveSources();
+  clearAudioError();
+  loadBuffer(src("long_high_risefall")).then(function(buf){
+    var ctx = ensureCtx();
+    var s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination);
+    s.start();
+    activeSources = [s];
+  }).catch(function(err){ showAudioError(err); });
 });
 
 document.getElementById("btnDemoContinue").addEventListener("click", function(){
@@ -917,6 +919,12 @@ function startRatingPhase(){
   ratings = loadRatings();
   ratingIdx = ratings.length;
   pairCard.style.display = "none";
+  // pLede ("Compare sounds one pair at a time. Listen to F (left)...") is the
+  // top-of-page instruction for the pairwise step only - it sits above
+  // mainArea so it was never hidden when the rating step (no more pairs,
+  // just rate each sound) started, leaving stale/contradictory instructions
+  // on screen the whole time.
+  pLedeEl.style.display = "none";
   if (ratingIdx >= ITEMS.length){ finishStudy(); return; }
   rateCard.style.display = "block";
   setupRating();
