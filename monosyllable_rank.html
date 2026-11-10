@@ -1206,8 +1206,21 @@ function submitPendingComparisons(){
       if (!GAS_URL) return true;
       if (results.length <= submittedCount) return true;
       var pending = results.slice(submittedCount);
+      // Capture exactly how far THIS request's pending slice reaches before
+      // awaiting - results.length keeps growing while the fetch is in
+      // flight (the participant keeps answering), so reading results.length
+      // AFTER the await to decide how far submittedCount advances silently
+      // marks everything pushed during the wait as "sent" even though only
+      // `pending` was actually transmitted. This was the real cause of the
+      // missing-trial-index pattern seen in testing (always starting right
+      // at a batch boundary): on any request slow enough that more trials
+      // landed before it resolved, submittedCount jumped straight to the
+      // current (much larger) results.length, permanently skipping every
+      // trial in between - never retried because submittedCount already
+      // claimed they were sent.
+      var sentThrough = submittedCount + pending.length;
       var ok = await submitToSheet("comparisons", COMPARISON_COLS, pending);
-      if (ok){ submittedCount = results.length; saveSubmittedCount(submittedCount); }
+      if (ok){ submittedCount = sentThrough; saveSubmittedCount(submittedCount); }
       return ok;
     } finally {
       submitPendingComparisonsInFlight = null;
@@ -1281,8 +1294,12 @@ function submitPendingRatings(){
       if (!GAS_URL) return true;
       if (ratings.length <= ratingSubmittedCount) return true;
       var pending = ratings.slice(ratingSubmittedCount);
+      // Same fix as submitPendingComparisons - capture how far this
+      // request's slice reaches before awaiting, so ratingSubmittedCount
+      // only ever advances by what THIS request actually sent.
+      var sentThrough = ratingSubmittedCount + pending.length;
       var ok = await submitToSheet("sada_ratings", RATING_COLS, pending);
-      if (ok){ ratingSubmittedCount = ratings.length; saveRatingSubmittedCount(ratingSubmittedCount); }
+      if (ok){ ratingSubmittedCount = sentThrough; saveRatingSubmittedCount(ratingSubmittedCount); }
       return ok;
     } finally {
       submitPendingRatingsInFlight = null;
