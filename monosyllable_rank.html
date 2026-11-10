@@ -516,6 +516,12 @@ consentCheckbox.addEventListener("change", function(){
 btnConsentContinue.addEventListener("click", function(){
   if (!consentCheckbox.checked) return;
   saveConsent();
+  // Server-side audit trail: localStorage alone only proves consent
+  // indirectly (via later rows existing for this pid) and never leaves the
+  // participant's own browser, so also log the acceptance itself.
+  if (GAS_URL) submitToSheet("consent_log", CONSENT_COLS, [{
+    pid: PID, group: GROUP, cond: COND, device_info: DEVICE_INFO, consented_at: new Date().toISOString()
+  }]);
   consentCard.style.display = "none";
   if (loadDemo()){ showMainArea(); } else { demoCard.style.display = ""; }
 });
@@ -1088,6 +1094,7 @@ var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_p
 var RANKING_COLS = ["pid","group","cond","age","gender","pet","pet_other","hearing","device","device_info","rank","id","dur","pitch","contour"];
 var RATING_COLS = ["pid","group","cond","rating_idx","id","dur","pitch","contour","intentional","social","anxious","urgency","hesitant","pleading","weak","alive","ts"];
 var CATCH_COLS = ["pid","group","cond","trial_position","expected_side","chosen_side","correct","rt_ms","ts"];
+var CONSENT_COLS = ["pid","group","cond","device_info","consented_at"];
 
 // ---- Incremental submission (don't wait for the very end) ----
 // finishStudy() only runs after a participant completes BOTH the full
