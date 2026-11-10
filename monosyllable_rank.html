@@ -241,9 +241,7 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
       </div>
       <p class="hint" id="commentSentHint" style="display:none"></p>
       <div class="controls" id="fallbackExport" style="display:none">
-        <button class="ctl" id="btnExport">Export CSV (comparisons)</button>
-        <button class="ctl" id="btnExportRanking">Export CSV (ranking)</button>
-        <button class="ctl" id="btnExportRatings">Export CSV (sada_ratings)</button>
+        <button class="ctl" id="btnExport">Download backup file</button>
       </div>
       <p class="hint" id="fallbackExportHint" style="display:none;color:var(--accent)"></p>
     </div>
@@ -322,8 +320,9 @@ var STR = {
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
   doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
   doneBodySaving: { th: "กำลังบันทึกคำตอบขึ้นระบบ... กรุณาอย่าเพิ่งปิดหน้านี้หรือล็อกหน้าจอ รอสักครู่", en: "Saving your answers... please don't close this page or lock your screen yet. This takes just a moment.", ja: "回答を保存しています… このページを閉じたり画面をロックしたりせず、少々お待ちください。" },
-  fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the buttons below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
-  fallbackFailed: { th: "ส่งข้อมูลอัตโนมัติไม่สำเร็จ (อินเทอร์เน็ตอาจมีปัญหา) — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยแทน", en: "Automatic submission failed (possible connection issue) - use the buttons below to download your data and send it to the researcher instead.", ja: "自動送信に失敗しました（通信エラーの可能性）— 下のボタンでデータをダウンロードし、研究者に送ってください。" },
+  fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the button below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
+  fallbackFailed: { th: "ลองส่งข้อมูลอัตโนมัติหลายครั้งแล้วยังไม่สำเร็จ (อินเทอร์เน็ตอาจมีปัญหา) ระบบจะยังคงลองส่งต่อไปเรื่อยๆ ในพื้นหลัง ไม่ต้องทำอะไรก็ได้ — ถ้าสะดวก สามารถช่วยกดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเพิ่มเติมได้ (ไม่บังคับ)", en: "Tried sending automatically several times, still unsuccessful (possible connection issue). It'll keep retrying quietly in the background, so you don't need to do anything - but if convenient, you're welcome to use the button below to download your data and send it to the researcher as a backup (optional).", ja: "自動送信を何度か試みましたが、まだ成功していません（通信エラーの可能性）。バックグラウンドで引き続き自動的に再試行しますので、特に何もしていただく必要はありません — もしよろしければ、下のボタンでデータをダウンロードし、研究者にバックアップとして送っていただくこともできます（任意）。" },
+  fallbackRetrying: { th: "กำลังลองส่งข้อมูลอีกครั้งโดยอัตโนมัติ — ไม่ต้องทำอะไร แค่เปิดหน้านี้ทิ้งไว้สักครู่", en: "Retrying automatically - no action needed, just leave this page open for a moment.", ja: "自動的に再送信を試みています — 何もする必要はありません。このページを少しの間開いたままにしておいてください。" },
   lblComment: { th: "มีคู่ไหนที่รู้สึกเฉยๆ ไม่อยากเลือกเลยมั้ย เล่าได้ (ไม่บังคับ)", en: "Were there pairs where you felt neutral, not really wanting either? Tell us here (optional)", ja: "どちらも選びたくないと感じたペアはありましたか？よければ教えてください（任意）" },
   btnSubmitComment: { th: "ส่งความคิดเห็น", en: "Submit comment", ja: "コメントを送信" },
   commentSent: { th: "ขอบคุณสำหรับความคิดเห็น", en: "Thanks for the comment", ja: "コメントをありがとうございます" },
@@ -1337,17 +1336,39 @@ async function submitToSheet(sheetName, cols, rows){
     return !!(body && body.ok === true);
   } catch(e){ return false; }
 }
-async function exportCsv(csv, fname){
+// Real browsers on a public site have no window.claude - that capability
+// only exists inside Claude's own Artifact sandbox, so on every actual
+// participant's device the old code silently fell through to a clipboard
+// copy with no visible confirmation and nothing resembling a "file" to
+// attach and send, despite the on-screen text telling them to "download
+// the file." The one safety net meant to save data when automatic
+// submission fails was never actually working for a real participant.
+// A Blob + <a download> link works natively in every real browser, no
+// special capability required.
+function downloadFile(text, fname){
   try{
-    var downloads = await window.claude?.use?.("downloads");
-    if (downloads){ await downloads.save({ filename: fname, data: csv }); return true; }
-  } catch(e){}
-  try{ await navigator.clipboard.writeText(csv); } catch(e){}
-  return false;
+    var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    return true;
+  } catch(e){
+    try{ navigator.clipboard.writeText(text); } catch(e2){}
+    return false;
+  }
 }
-document.getElementById("btnExport").addEventListener("click", function(){ exportCsv(toCsv(COMPARISON_COLS, results), "mono_rank_comparisons_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
-document.getElementById("btnExportRanking").addEventListener("click", function(){ exportCsv(toCsv(RANKING_COLS, rankingRows()), "mono_rank_ranking_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
-document.getElementById("btnExportRatings").addEventListener("click", function(){ exportCsv(toCsv(RATING_COLS, ratings), "mono_rank_sada_ratings_" + GROUP + "_" + COND + "_" + PID + ".csv"); });
+document.getElementById("btnExport").addEventListener("click", function(){
+  // One combined file instead of three separate downloads - asking someone
+  // whose connection already failed once to save and send three separate
+  // files is a lot; one file with clearly labeled sections is much less.
+  var combined =
+    "=== comparisons ===\n" + toCsv(COMPARISON_COLS, results) + "\n\n" +
+    "=== ranking ===\n" + toCsv(RANKING_COLS, rankingRows()) + "\n\n" +
+    "=== sada_ratings ===\n" + toCsv(RATING_COLS, ratings) + "\n";
+  downloadFile(combined, "mono_rank_backup_" + GROUP + "_" + COND + "_" + PID + ".csv");
+});
 
 var COMMENT_COLS = ["pid","group","cond","comment","ts"];
 document.getElementById("btnSubmitComment").addEventListener("click", async function(){
@@ -1356,7 +1377,7 @@ document.getElementById("btnSubmitComment").addEventListener("click", async func
   if (!text) return;
   var row = { pid: PID, group: GROUP, cond: COND, comment: text, ts: new Date().toISOString() };
   var ok = GAS_URL ? await submitToSheet("comments", COMMENT_COLS, [row]) : false;
-  if (!ok) { await exportCsv(toCsv(COMMENT_COLS, [row]), "mono_rank_comment_" + GROUP + "_" + COND + "_" + PID + ".csv"); }
+  if (!ok) { downloadFile(toCsv(COMMENT_COLS, [row]), "mono_rank_comment_" + GROUP + "_" + COND + "_" + PID + ".csv"); }
   hintEl.style.display = "block";
   hintEl.textContent = STR.commentSent[lang];
   this.disabled = true;
@@ -1380,6 +1401,27 @@ var FINISHED_KEY = "mono_rank_finished_v1_" + GROUP + "_" + COND;
 function loadFinishedSubmitted(){ return localStorage.getItem(FINISHED_KEY) === "1"; }
 function saveFinishedSubmitted(){ localStorage.setItem(FINISHED_KEY, "1"); }
 var origFinish = finishStudy;
+// Found from real test data: two devices both failed to send
+// ranking/sada_ratings/catch_trial right at the pairwise-to-rating
+// transition, consistent with a connectivity drop around that moment -
+// comparisons kept arriving fine right up to it (each periodic batch gets
+// retried on its own), but ranking/ratings/catch_trial only ever got ONE
+// attempt here, with nothing to retry them once connectivity came back
+// (confirmed one participant successfully posted a comment several minutes
+// later, proving the connection did recover, but the earlier failed
+// submissions were never retried since nothing but a page reload would
+// have triggered that). A quiet background retry loop closes that gap: if
+// the first attempt fails, keep trying every 20s for as long as this page
+// stays open, so recovered connectivity gets the data through without the
+// participant needing to do anything.
+var finishRetryInterval = null;
+async function attemptFinalSubmission(){
+  var ok1 = await submitPendingComparisons();
+  var ok2 = await submitRankingIfReady();
+  var ok3 = await submitPendingRatings();
+  var ok4 = catchResults.length ? await submitToSheet("catch_trial", CATCH_COLS, catchResults) : true;
+  return ok1 && ok2 && ok3 && ok4;
+}
 finishStudy = async function(){
   origFinish();
   var fallback = document.getElementById("fallbackExport");
@@ -1391,17 +1433,39 @@ finishStudy = async function(){
     return;
   }
   if (loadFinishedSubmitted()){ doneBodyEl.textContent = STR.doneBody[lang]; return; }
-  var ok1 = await submitPendingComparisons();
-  var ok2 = await submitRankingIfReady();
-  var ok3 = await submitPendingRatings();
-  var ok4 = catchResults.length ? await submitToSheet("catch_trial", CATCH_COLS, catchResults) : true;
-  if (ok1 && ok2 && ok3 && ok4){
+  var allOk = await attemptFinalSubmission();
+  if (allOk){
     saveFinishedSubmitted();
     doneBodyEl.textContent = STR.doneBody[lang];
-  } else {
-    fallback.style.display = ""; fallbackHint.style.display = "block";
-    fallbackHint.textContent = STR.fallbackFailed[lang];
-    doneBodyEl.textContent = STR.fallbackFailed[lang];
+    return;
+  }
+  // Don't ask the participant to download and send 3 files on the very
+  // first failure - that reads as a lot to ask of someone who just finished
+  // a 15-20 minute survey. Show a reassuring "retrying automatically, don't
+  // worry about it" message with no buttons, and only surface the manual
+  // download option, clearly marked optional, if several automatic retries
+  // in a row still haven't gotten through.
+  var retryAttempts = 0;
+  var RETRIES_BEFORE_SHOWING_FALLBACK = 3;
+  doneBodyEl.textContent = STR.fallbackRetrying[lang];
+  if (!finishRetryInterval){
+    finishRetryInterval = setInterval(async function(){
+      var ok = await attemptFinalSubmission();
+      if (ok){
+        clearInterval(finishRetryInterval);
+        finishRetryInterval = null;
+        saveFinishedSubmitted();
+        doneBodyEl.textContent = STR.doneBody[lang];
+        fallback.style.display = "none"; fallbackHint.style.display = "none";
+        return;
+      }
+      retryAttempts++;
+      if (retryAttempts >= RETRIES_BEFORE_SHOWING_FALLBACK){
+        fallback.style.display = ""; fallbackHint.style.display = "block";
+        fallbackHint.textContent = STR.fallbackFailed[lang];
+        doneBodyEl.textContent = STR.fallbackFailed[lang];
+      }
+    }, 20000);
   }
 };
 
