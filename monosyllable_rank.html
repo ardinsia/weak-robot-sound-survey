@@ -233,7 +233,10 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
       <p class="hint" id="fallbackExportHint" style="display:none;color:var(--accent)"></p>
     </div>
 
-    <p class="footnote" id="fnDesign">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม — หลัง ranking เสร็จ มีขั้นที่ 2 ให้คะแนนทีละเสียง (ครบทั้ง 20 เสียง) ด้วย 5 ข้อที่ดัดแปลงจาก Sada, Yamagiwa &amp; Okada (2016, HIS Vol.18 No.3:221-230)'s 20-item/5-factor weak-robot scale - เฉพาะปัจจัย intentional stance (Q4, Q5) และ social display (Q8, Q9, Q10) ที่ battery เดิมของเราไม่ครอบคลุม ส่วน Q1-Q3/Q11-Q20 ตัดออกเพราะซ้ำกับ item ที่มีอยู่แล้ว (alive/sad/help_want/need_help) และ Q6-Q7 ตัดออกเพราะผูกกับวัตถุ (ขยะ) ที่ไม่มีใน stimulus เสียงล้วนของเรา — เพิ่มเติมเพื่อความแน่นของข้อมูล: (1) มีคู่ฝึกใช้งาน 1 คู่ก่อนเริ่มนับจริง ไม่เก็บข้อมูล (2) มีคู่ instructed-response catch trial แทรกไว้กลางชุด (ให้เลือกฝั่งซ้ายตามคำสั่งเพื่อตรวจว่าอ่านคำแนะนำอยู่จริง ไม่ใช่กดมั่ว) บันทึกแยกจาก ranking (3) เก็บชนิดอุปกรณ์ฟัง (หูฟัง/ลำโพง) และให้ฟังเสียงทดสอบก่อนเริ่ม เพื่อ control confound จากอุปกรณ์ (4) ตำแหน่งซ้าย/ขวาของแต่ละคู่สุ่ม 50/50 ทุกครั้งที่เล่น เป็นอิสระจากลำดับภายในของ merge-sort comparator ไม่ใช่ตำแหน่งคงที่ตามโครงสร้างต้นไม้ (5) ข้อมูลการเทียบคู่ถูกส่งขึ้น Google Sheet เป็นช่วงๆ (ทุก 10 คู่ และตอนปิด/สลับแท็บ) ไม่ใช่รอจบครั้งเดียว เพื่อไม่ให้ข้อมูลหายหากออกกลางทาง</p>
+    <!-- Internal design-rationale notes, not shown to participants (hidden
+         per researcher's request - this is documentation for the paper's
+         methods section, not something a participant needs to read). -->
+    <p class="footnote" id="fnDesign" style="display:none">การออกแบบ: 20 เสียง (duration สั้น 180ms/ยาว 900ms x pitch ต่ำ 400Hz/สูง 850Hz x melody contour 5 แบบ: flat/fall/rise/risefall/fallrise) <b>default = เสียง "beep" ล้วน</b> (Komatsu 2006 triangle wave, literature-pure, ไม่มี engineering choice ที่ไม่มีอ้างอิงเลย) เพื่อให้ผลที่ได้อ้างอิงได้สะอาดว่ามาจาก duration/pitch/contour ที่มีเปเปอร์รองรับเท่านั้น ไม่ปนกับ carrier/breath noise ที่เป็น design choice ของโปรเจกต์เอง — ต่อ URL ด้วย <code>&amp;cond=creature</code> เพื่อใช้ชุด "creature v3" แทน (มี formant filter + breath noise, ตัด jitter/shimmer/vibrato ตามฟีดแบ็กอาจารย์) สำหรับ arm เสริม/exploratory เท่านั้น ไม่ใช่ข้อมูลหลัก ใช้ adaptive comparison แบบ merge-sort (Silverstein &amp; Farrell 2001 - ยังไม่ได้อ่าน full text ยืนยัน) แทนที่จะเทียบครบทุกคู่ (190 คู่) เพื่อให้ได้ full ranking ต่อคนในเวลาที่เหมาะสม (~15-20 นาที) กลุ่มผู้เข้าร่วม (ไทย/ญี่ปุ่น) กำหนดจากลิงก์ที่ใช้เข้ามา ไม่ได้ถามในแบบฟอร์ม — หลัง ranking เสร็จ มีขั้นที่ 2 ให้คะแนนทีละเสียง (ครบทั้ง 20 เสียง) ด้วย 8 ข้อ: 3 ข้อดัดแปลง/รวมจาก Sada, Yamagiwa &amp; Okada (2016, HIS Vol.18 No.3:221-230)'s 20-item/5-factor weak-robot scale - "intentional" (รวม Q4+Q5), "social" (รวม Q8+Q9), "anxious" (Q18 - สวอปมาแทน Q10 หลัง pilot #1 เพราะ Q9/Q10 ซ้ำกันเกินไป) - ตัวที่เหลือ (Q1-Q3/Q6-Q7/Q10-Q17/Q19-Q20) ตัดออกเพราะซ้ำกับ item ที่มีอยู่แล้ว (alive/sad/help_want/need_help) หรือผูกกับวัตถุ (ขยะ) ที่ไม่มีใน stimulus เสียงล้วนของเรา และ 3 ข้อใหม่ที่ไม่ได้มาจาก Sada - "urgency" (perceived urgency ของเสียงหุ่นยนต์/เสียงเตือน เทียบได้กับ Narwane (Twente thesis, cross-cultural TH-NL) และ Orthmann et al. 2023 ACM THRI "Sounding Robots" - เจอจาก web search รอบนี้ ยังไม่ได้อ่าน full text), "hesitant" (ใช้ Komatsu 2006/2010 confidence/hesitation construct ที่อ้างอิงอยู่แล้วในแกน contour), "pleading" (ข้อสรุปของโปรเจกต์เอง ต่อจาก Ohala 1984 frequency-code ที่อ้างอิงอยู่แล้วเป็นเหตุผลของแกน rise - ไม่เจอเปเปอร์ไหนวัดตรงๆ เรื่องนี้คือปฏิกิริยา "felt pleading" ที่เป็นจุดเริ่มต้นของทิศทาง monosyllable ทั้งหมด แต่ไม่เคยถามตรงๆมาก่อน) และ 2 ข้อที่เอามาจาก main battery เดิม (survey/js/i18n.js) ตรงๆ - "weak" (แกนหลักของงานวิจัย ที่จริงไม่เคยถามตรงๆเลยในชุดนี้ และตามที่อาจารย์ Fukuchi บอกว่า "ไม่ได้มีแค่ weak" แปลว่า weak ควรยังอยู่เป็น baseline ให้ข้ออื่นเสริม ไม่ใช่แทนที่) และ "alive" (animacy check) ส่วน need_help/sick/sad/sympathy/distress/help_want/annoying ไม่เอามาด้วยเพื่อคุมเวลาไม่ให้เกิน (8x20=160 ครั้ง ไม่ใช่ 15x20=300) — เพิ่มเติมเพื่อความแน่นของข้อมูล: (1) มีคู่ฝึกใช้งาน 1 คู่ก่อนเริ่มนับจริง ไม่เก็บข้อมูล (2) มีคู่ instructed-response catch trial / attention check (Oppenheimer, Meyvis & Davidenko 2009-style - cited from memory, ไม่ได้อ่าน full text ยืนยัน) แทรกไว้กลางชุด บันทึกแยกจาก ranking (3) เก็บชนิดอุปกรณ์ฟัง (หูฟัง/ลำโพง) และให้ฟังเสียงทดสอบก่อนเริ่ม เพื่อ control confound จากอุปกรณ์ (4) ตำแหน่งซ้าย/ขวาของแต่ละคู่สุ่ม 50/50 ครั้งเดียวต่อคู่ (ไม่สุ่มใหม่เวลากดเล่นซ้ำคู่เดิม กันคนฟังงงว่าเสียงสลับฝั่ง) เป็นอิสระจากลำดับภายในของ merge-sort comparator ไม่ใช่ตำแหน่งคงที่ตามโครงสร้างต้นไม้ (5) ข้อมูลการเทียบคู่ถูกส่งขึ้น Google Sheet เป็นช่วงๆ (ทุก 10 คู่ และตอนปิด/สลับแท็บ) ไม่ใช่รอจบครั้งเดียว เพื่อไม่ให้ข้อมูลหายหากออกกลางทาง</p>
   </div>
 </div>
 
@@ -295,7 +298,7 @@ var STR = {
   subLeft: { th: "ซ้าย", en: "left", ja: "左" },
   subRight: { th: "ขวา", en: "right", ja: "右" },
   btnStart: { th: "เล่น / เล่นซ้ำ (แตะ หรือกด Space)", en: "Play / Replay (tap, or press Space)", ja: "再生 / もう一度（タップ、または Space）" },
-  pHint: { th: "เลือกวิธีที่สะดวกตามอุปกรณ์: <b>คลิก/แตะ</b>กล่องซ้าย-ขวา หรือ <b>กด</b> <b>F</b> (ซ้าย)/<b>J</b> (ขวา) บนคีย์บอร์ด — เล่นเสียงด้วยการคลิก/แตะปุ่มเล่น หรือกด <b>Space</b> ก็ได้เหมือนกัน &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "Use whichever fits your device: <b>click/tap</b> the left/right box, or <b>press</b> <b>F</b> (left)/<b>J</b> (right) on a keyboard — and play the sound by clicking/tapping the Play button or pressing <b>Space</b>, either works &nbsp;·&nbsp; you can answer only after both have played", ja: "お使いの機器に合わせてどちらでも: 左右のボックスを<b>クリック/タップ</b>、またはキーボードの<b>F</b>（左）/<b>J</b>（右）を<b>押す</b> — 再生も再生ボタンのクリック/タップか<b>Space</b>キー、どちらでも同じです &nbsp;·&nbsp; 両方再生後のみ選択できます" },
+  pHint: { th: "ใช้<b>คีย์บอร์ด</b>: กด <b>F</b>=เลือกซ้าย, <b>J</b>=เลือกขวา, <b>Space</b>=เล่น/เล่นซ้ำ &nbsp;·&nbsp; ใช้<b>มือถือ/แท็บเล็ต</b>: <b>แตะกล่องฝั่งที่ชอบเพื่อเลือกได้เลย</b> ไม่ต้องกดอะไรเพิ่ม, แตะปุ่มเล่นเพื่อฟังซ้ำ &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "On a <b>keyboard</b>: press <b>F</b>=choose left, <b>J</b>=choose right, <b>Space</b>=play/replay &nbsp;·&nbsp; On <b>mobile/tablet</b>: <b>tap the box you prefer to choose it directly</b>, no extra tap needed, tap the Play button to replay &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>キーボード</b>: <b>F</b>キー=左を選択、<b>J</b>キー=右を選択、<b>Space</b>キー=再生/もう一度 &nbsp;·&nbsp; <b>モバイル/タブレット</b>: <b>好きな方のボックスをタップすればそのまま選択されます</b>、追加の操作は不要です。再生ボタンのタップでもう一度再生 &nbsp;·&nbsp; 両方再生後のみ選択できます" },
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
   doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
   fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the buttons below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
@@ -316,15 +319,15 @@ var STR = {
     ja: "（練習です — 記録されません）聞いてから、どちらでもよいので選んでください。本番前の操作確認です"
   },
   catchNotice: {
-    th: "ข้อนี้พิเศษ: ไม่ว่าฟังแล้วรู้สึกยังไง ให้เลือกฝั่งซ้าย (F) เพื่อยืนยันว่าคุณอ่านคำแนะนำและกำลังตั้งใจทำอยู่",
-    en: "This one is special: regardless of what you hear, please choose the LEFT option (F) — this confirms you're reading the instructions and paying attention",
-    ja: "この問題は特別です：聞いた内容に関わらず、左側（F）を選んでください — 指示を読み、注意して取り組んでいることを確認するためです"
+    th: "แบบสอบถามวิจัยมักมีคำถามแบบนี้แทรกไว้ เรียกว่า \"คำถามตรวจสอบความตั้งใจ\" (attention check) — ข้อนี้ขอให้เลือกฝั่งซ้าย (F) ตามคำสั่งนี้เท่านั้น ไม่เกี่ยวกับเสียงที่ได้ยินเลย",
+    en: "Research surveys often include a question like this one, called an \"attention check\" — for this item specifically, choose the LEFT option (F) exactly as instructed here, regardless of what you hear.",
+    ja: "研究調査にはこのような「アテンションチェック（注意確認）」の質問がよく含まれます — この項目だけは、聞いた音の内容に関係なく、この指示どおり左側（F）を選んでください。"
   },
   consentTitle: { th: "แบบฟอร์มยินยอมเข้าร่วมงานวิจัย", en: "Research Participation Consent Form", ja: "研究参加同意書" },
   consentPurpose: {
-    th: "<b>วัตถุประสงค์:</b> งานวิจัยนี้เป็นส่วนหนึ่งของวิทยานิพนธ์ปริญญาเอก (Tokyo Metropolitan University) ภายใต้การดูแลของศาสตราจารย์ Fukuchi เพื่อศึกษาว่าเสียงสังเคราะห์แบบต่างๆ ที่หุ่นยนต์เปล่งออกมา ทำให้ผู้ฟังรู้สึกอยากช่วยหุ่นยนต์มากน้อยต่างกันอย่างไร ผลการศึกษาจะนำไปเสนอในงานประชุมวิชาการ KST 2027",
-    en: "<b>Purpose:</b> This study is part of a PhD research project (Tokyo Metropolitan University), supervised by Prof. Fukuchi. It investigates how different synthetic robot sounds affect listeners' willingness to help a robot that appears to need assistance. Findings will be presented at the KST 2027 conference.",
-    ja: "<b>目的:</b> 本研究は首都大学東京（Tokyo Metropolitan University）における博士研究の一部であり、Fukuchi教授の指導の下で行われます。ロボットが発する様々な合成音が、聞き手が「助けたい」と感じる度合いにどのように影響するかを調査します。結果はKST 2027学会にて発表される予定です。"
+    th: "<b>วัตถุประสงค์:</b> งานวิจัยนี้เป็นส่วนหนึ่งของวิทยานิพนธ์ปริญญาเอก (Tokyo Metropolitan University) ภายใต้การดูแลของ Professor Nobuyuki Nishiuchi และ Assistant Professor Yosuke Fukuchi เพื่อศึกษาว่าเสียงสังเคราะห์แบบต่างๆ ที่หุ่นยนต์เปล่งออกมา ทำให้ผู้ฟังรู้สึกอยากช่วยหุ่นยนต์มากน้อยต่างกันอย่างไร ผลการศึกษาจะนำไปเสนอในงานประชุมวิชาการ KST 2027",
+    en: "<b>Purpose:</b> This study is part of a PhD research project (Tokyo Metropolitan University), supervised by Professor Nobuyuki Nishiuchi and Assistant Professor Yosuke Fukuchi. It investigates how different synthetic robot sounds affect listeners' willingness to help a robot that appears to need assistance. Findings will be presented at the KST 2027 conference.",
+    ja: "<b>目的:</b> 本研究は首都大学東京（Tokyo Metropolitan University）における博士研究の一部であり、Nishiuchi Nobuyuki教授およびFukuchi Yosuke助教の指導の下で行われます。ロボットが発する様々な合成音が、聞き手が「助けたい」と感じる度合いにどのように影響するかを調査します。結果はKST 2027学会にて発表される予定です。"
   },
   consentProcedure: {
     th: "<b>ขั้นตอน:</b> ท่านจะได้ฟังเสียงสังเคราะห์สั้นๆ ทีละคู่ แล้วเลือกเสียงที่ทำให้อยากช่วยมากกว่า (ประมาณ 60-70 คู่) จากนั้นจะได้ฟังเสียงเดิมทีละเสียงแล้วให้คะแนนความรู้สึกสั้นๆ 5 ข้อต่อเสียง (รวม 20 เสียง) ใช้เวลาทั้งหมดประมาณ 15-20 นาที แนะนำให้ใช้หูฟังในที่เงียบ",
@@ -364,21 +367,81 @@ var STR = {
   },
 };
 
-// 5 items adapted from Sada, Yamagiwa & Okada (2016, HIS Vol.18 No.3:221-230)'s
-// validated 20-item/5-factor scale for a weak human-dependent robot - Q4/Q5
-// (intentional stance) and Q8/Q9/Q10 (social display), the two factors this
-// project's own battery (Okada 2024 + BIAS map + Batson + Cowen + Anikin&Reby)
-// doesn't cover. Q1-Q3 (animacy), Q11-Q14 (cooperativity) and Q15-Q20
-// (emotionality) were left out as redundant with existing items (alive, sad,
-// help_want, need_help). Q6/Q7 (also intentional-stance in the source) were
-// dropped entirely - they ask whether the robot "noticed/wanted the trash",
-// which doesn't transfer to an audio-only stimulus with no visible object.
+// 6 post-ranking rating items, revised after pilot participant #1 (whose
+// sada_ratings row used the older 5-item set: q4_purpose, q5_wanted,
+// q8_trying, q9_trouble, q18_anxious - flag/exclude that participant if
+// analyzing these specific items). No real participant data exists yet
+// beyond that pilot, so this revision carries no cost.
+//
+// 3 items adapted from Sada, Yamagiwa & Okada (2016, HIS Vol.18 No.3:
+// 221-230)'s validated 20-item/5-factor scale for a weak human-dependent
+// robot, each MERGING two of their near-duplicate items into one combined
+// statement (same move the sibling tool, pairwise_compare/index.html,
+// already made for the same reason - two separately-worded items for one
+// underlying factor add little beyond one):
+//   - "intentional": Q4+Q5 (intentional stance factor)
+//   - "social": Q8+Q9 (social display factor)
+//   - "anxious": Q18 alone (emotionality factor) - the only Sada item
+//     capturing an anxious/agitated quality distinct from "sad" (already in
+//     the main battery, closer to Sada's Q16) and from Q8/Q9
+// Q1-Q3 (animacy), Q6/Q7 (tied to the trash object, doesn't transfer to an
+// audio-only stimulus), Q10, Q11-Q17, Q19-Q20 and Q11-Q14 (cooperativity,
+// redundant with alive/help_want/need_help) were all left out.
+//
+// 3 NEW items, not from Sada, added because the researcher's own listening
+// notes named these reactions and no existing item covered them:
+//   - "urgency": closest validated analogue is perceived URGENCY of robot/
+//     non-speech alert sounds - e.g. Narwane (Univ. Twente thesis), "A
+//     Cross-Cultural Study on the Perceived Urgency of Semantic-Free
+//     Utterances for a Hospital Delivery Robot" (India/Netherlands
+//     comparison - directly analogous cross-cultural design to this
+//     TH/JA study), and Orthmann et al. (2023, ACM THRI), "Sounding
+//     Robots," which maps urgency to acoustic parameters. Also resembles
+//     Fernald's (1989) "Attention-bid" category, already cited in this
+//     project for the contour axis. [Found via web search this session,
+//     not full-text read - bibliographic-level citation only.]
+//   - "hesitant": maps directly onto Komatsu (2006/2010)'s confidence/
+//     hesitation construct, already this project's primary citation for
+//     the melody-contour axis (falling contour = low confidence). No new
+//     citation needed - same source already verified in full elsewhere in
+//     this project.
+//   - "pleading": grounded in Ohala's (1984) frequency-code account
+//     (rising pitch = submission/appeasement signal), already cited in
+//     this project as the rationale for the `rise` contour level. This is
+//     this project's OWN extrapolation from that citation, not a borrowed,
+//     independently-validated item - a web search this session found no
+//     paper using "pleading"/"wheedling"/"coaxing" for robot sound
+//     specifically. Notably, "felt pleading" was the original listening
+//     reaction that motivated this entire monosyllable stimulus direction
+//     (see MONOSYLLABLE_MATRIX_THEORY_2026-11-06.md) - this is the first
+//     time that reaction is actually being measured rather than assumed.
+//
+// 2 items reused VERBATIM (same wording/translations) from this project's
+// main idea1 battery (survey/js/i18n.js's 9-item set: need_help, weak,
+// sick, sad, sympathy, distress, help_want, annoying, alive) - that
+// battery is a separate tool (not part of this one), and was the backdrop
+// used to justify dropping Sada's animacy/cooperativity items as
+// "redundant with existing items." On review, THIS tool never actually
+// asks those items itself, so two were pulled in directly:
+//   - "weak": the study's own central construct ("sounds feeble/weak"),
+//     and per Prof. Fukuchi's own feedback ("it's not just about weak"),
+//     this is meant to stay as the baseline/anchor the other items
+//     supplement, not be replaced by them - it had been missing entirely.
+//   - "alive": a cheap animacy/manipulation check on the stimuli.
+// The rest of the 9 (need_help, sick, sad, sympathy, distress, help_want,
+// annoying) were deliberately NOT added, to keep the rating phase at a
+// manageable 8 items x 20 sounds = 160 ratings rather than 15 x 20 = 300 -
+// help_want in particular would have mostly duplicated the pairwise task's
+// own "want to help" construct in a different (absolute vs. relative) form.
 var RATING_ITEMS = [
-  { key: "q4_purpose", th: "หุ่นยนต์ดูเหมือนมีเป้าหมาย", en: "The robot seemed to have a purpose", ja: "ロボットは目的を持っているようだった" },
-  { key: "q5_wanted", th: "รู้ว่าหุ่นยนต์อยากทำอะไร", en: "I understood what the robot wanted to do", ja: "ロボットが何をしたいかわかった" },
-  { key: "q8_trying", th: "หุ่นยนต์ดูพยายามอยู่", en: "The robot seemed to be trying hard", ja: "ロボットは頑張っているようだった" },
-  { key: "q9_trouble", th: "หุ่นยนต์ดูลำบาก", en: "The robot seemed to be in trouble", ja: "ロボットは困っているようだった" },
-  { key: "q10_problem", th: "หุ่นยนต์ดูเหมือนมีปัญหา", en: "The robot seemed to have a problem", ja: "ロボットは問題を抱えているようだった" },
+  { key: "intentional", th: "หุ่นยนต์ดูเหมือนมีเป้าหมาย/รู้ว่าอยากทำอะไร", en: "The robot seemed to have a purpose / I understood what it wanted to do", ja: "ロボットは目的を持っている／何をしたいかわかるようだった" },
+  { key: "social", th: "หุ่นยนต์ดูพยายามอยู่/ดูลำบาก", en: "The robot seemed to be trying hard / seemed to be in trouble", ja: "ロボットは頑張っている／困っているようだった" },
+  { key: "anxious", th: "หุ่นยนต์ดูกระวนกระวาย/ร้อนใจ", en: "The robot seemed anxious / flustered", ja: "ロボットは焦っているようだった" },
+  { key: "urgency", th: "หุ่นยนต์ดูเหมือนเรียกร้องให้สนใจ/เร่งด่วน", en: "The robot seemed to be demanding attention / urgent", ja: "ロボットは注目を求めている／緊急であるように聞こえた" },
+  { key: "hesitant", th: "หุ่นยนต์ดูลังเล/ไม่มั่นใจ", en: "The robot seemed hesitant / unsure", ja: "ロボットは迷っているように聞こえた" },
+  { key: "pleading", th: "หุ่นยนต์ฟังดูออดอ้อน/เหมือนขอร้อง", en: "The robot sounded like it was pleading / coaxing", ja: "ロボットはねだっているように聞こえた" },
+  { key: "weak", th: "หุ่นยนต์ฟังดูอ่อนแอ ไม่มีแรง", en: "The robot sounds feeble / weak", ja: "このロボットは弱々しく聞こえる。" },
+  { key: "alive", th: "เสียงนี้ฟังดูมีชีวิตเหมือนสัตว์", en: "This sound seems alive, like an animal.", ja: "この音は動物のように生きているように聞こえる。" },
 ];
 
 function applyLang(){
@@ -611,13 +674,18 @@ function savePracticeDone(){ localStorage.setItem(PRACTICE_KEY, "1"); }
 var practiceMode = !loadPracticeDone();
 var PRACTICE_PAIR = [ITEMS[0].id, ITEMS[ITEMS.length - 1].id];
 
-// ---- Instructed-response catch trial (data-quality check) ----
-// One instructed-response item (Oppenheimer, Meyvis & Davidenko 2009-style:
-// "pick LEFT no matter what you hear") inserted partway through the real
-// trials. Unlike the forced-choice preference trials themselves, this one
-// has a verifiable correct answer, so it is the only way this unsupervised
-// online study can flag inattentive/careless responding. Not fed into the
-// merge-sort comparator - logged separately, trialIdx does not advance for it.
+// ---- Instructed-response catch trial / attention check (data-quality check) ----
+// Standard technique in unsupervised online studies: an Instructional
+// Manipulation Check (Oppenheimer, Meyvis & Davidenko, 2009, "Instructional
+// manipulation checks: Detecting satisficing to increase statistical power,"
+// J. Experimental Social Psychology 45(4):867-872 - well-known/widely cited
+// technique, cited from memory here, not yet full-text verified in this
+// project). One such item ("pick LEFT no matter what you hear") is inserted
+// partway through the real trials. Unlike the forced-choice preference
+// trials themselves (which have no "correct" answer), this one does, so it
+// is the only way this study can flag inattentive/careless responding.
+// Not fed into the merge-sort comparator - logged separately, trialIdx does
+// not advance for it.
 var CATCH_KEY = "mono_rank_catch_v1_" + GROUP + "_" + COND;
 function loadCatchDone(){ return localStorage.getItem(CATCH_KEY) === "1"; }
 function saveCatchDone(){ localStorage.setItem(CATCH_KEY, "1"); }
@@ -677,6 +745,12 @@ var pairCard = document.getElementById("pairCard"), doneCard = document.getEleme
 var progressCount = document.getElementById("progressCount"), progressPct = document.getElementById("progressPct"), barFill = document.getElementById("barFill");
 var canAnswer = false, rightEndedAt = null, pendingSide = null, pendingKeyDownAt = null, lastChoiceResult = null;
 var activeSources = [];
+// This trial's chosen ids (and, for a real pair, which one is screen-left)
+// - decided ONCE in setupTrial() when the pair first comes up, never
+// re-rolled by pressing Play again to replay the SAME pair. Re-rolling on
+// every replay would let the two sounds swap sides mid-trial, which is
+// confusing and would make "F"/"J" refer to a different sound each listen.
+var pendingLeftId = null, pendingRightId = null, pendingGenA = null;
 
 function stopActiveSources(){ activeSources.forEach(function(s){ try { s.stop(); } catch(e){} }); activeSources = []; }
 function clearSlots(){ slotLeft.classList.remove("playing", "chosen"); slotRight.classList.remove("playing", "chosen"); }
@@ -833,22 +907,33 @@ function setupTrial(){
   catchMode = (!practiceMode && !catchDone && trialIdx === CATCH_AT);
   updateTrialNotice();
   updateProgress();
+  // Decide THIS pair's ids - and, for a real pair, a fresh 50/50 screen-side
+  // swap independent of the merge-sort comparator's internal order - once,
+  // right here. playCurrentPair() below just plays whatever was decided, so
+  // pressing Play again to replay reuses the same sides; only moving on to
+  // the next pair (the next setupTrial() call) rolls a new swap.
+  if (practiceMode){
+    pendingLeftId = PRACTICE_PAIR[0]; pendingRightId = PRACTICE_PAIR[1]; pendingGenA = null;
+  } else if (catchMode){
+    pendingLeftId = CATCH_PAIR[0]; pendingRightId = CATCH_PAIR[1]; pendingGenA = null;
+  } else if (!genState.done){
+    var pair = genState.value;
+    var swap = Math.random() < 0.5;
+    pendingGenA = pair[0];
+    pendingLeftId = swap ? pair[1] : pair[0];
+    pendingRightId = swap ? pair[0] : pair[1];
+  } else {
+    pendingLeftId = pendingRightId = pendingGenA = null;
+  }
 }
 
-// Dispatches to whichever pair should play right now (practice / catch /
-// real), and for a real pair randomizes which item lands on-screen left (F)
-// vs. right (J) independently of the merge-sort comparator's internal
-// order - so the side a stimulus is heard on is not confounded with the
-// stimulus itself, and side preference ("counterbalanced left/right") can
-// honestly be reported in the methods section.
+// Plays whatever setupTrial() decided for the current pair - called once
+// when the pair first comes up, and again, unchanged, every time the
+// participant presses Play to replay it (see setupTrial's comment).
 function playCurrentPair(){
-  if (practiceMode){ window.__genA = null; playPair(PRACTICE_PAIR[0], PRACTICE_PAIR[1]); return; }
-  if (catchMode){ window.__genA = null; playPair(CATCH_PAIR[0], CATCH_PAIR[1]); return; }
-  if (genState.done) return;
-  var pair = genState.value;
-  var swap = Math.random() < 0.5;
-  window.__genA = pair[0];
-  playPair(swap ? pair[1] : pair[0], swap ? pair[0] : pair[1]);
+  if (pendingLeftId == null || pendingRightId == null) return;
+  window.__genA = pendingGenA;
+  playPair(pendingLeftId, pendingRightId);
 }
 
 function playPair(leftId, rightId){
@@ -1001,7 +1086,7 @@ var GAS_URL = "https://script.google.com/macros/s/AKfycbwOGe0H54xyPRZeY_-gCE3Xl0
 
 var COMPARISON_COLS = ["pid","group","cond","trial","left_id","left_dur","left_pitch","left_contour","right_id","right_dur","right_pitch","right_contour","choice_side","choice_id","swapped","device_info","rt_ms","hold_ms","ts"];
 var RANKING_COLS = ["pid","group","cond","age","gender","pet","pet_other","hearing","device","device_info","rank","id","dur","pitch","contour"];
-var RATING_COLS = ["pid","group","cond","rating_idx","id","dur","pitch","contour","q4_purpose","q5_wanted","q8_trying","q9_trouble","q10_problem","ts"];
+var RATING_COLS = ["pid","group","cond","rating_idx","id","dur","pitch","contour","intentional","social","anxious","urgency","hesitant","pleading","weak","alive","ts"];
 var CATCH_COLS = ["pid","group","cond","trial_position","expected_side","chosen_side","correct","rt_ms","ts"];
 
 // ---- Incremental submission (don't wait for the very end) ----
@@ -1028,6 +1113,13 @@ document.addEventListener("visibilitychange", function(){
   if (document.visibilityState === "hidden") submitPendingComparisons();
 });
 window.addEventListener("pagehide", function(){ submitPendingComparisons(); });
+
+// Crash recovery: if a hard close (crash/kill/power-loss) happened before the
+// every-10-trials send or pagehide fired, those rows sit unsent in
+// localStorage until this same PID/GROUP/COND browser is reopened. One flush
+// attempt on load - not a retry loop - picks them up; if the network is down
+// right now this just no-ops and the regular hooks above try again later.
+if (results.length > submittedCount) submitPendingComparisons();
 
 function rankingRows(){
   var demo = loadDemo() || {};
