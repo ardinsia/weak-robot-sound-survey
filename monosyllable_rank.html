@@ -1342,7 +1342,7 @@ async function submitToSheet(sheetName, cols, rows){
     // promise forever. An explicit timeout forces it to fail (and the
     // in-flight guard to clear) instead of hanging the retry loop forever.
     var controller = new AbortController();
-    var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
+    var timeoutId = setTimeout(function(){ controller.abort(); }, 20000);
     var res;
     try{
       res = await fetch(GAS_URL, {
