@@ -318,10 +318,12 @@ var STR = {
   btnStart: { th: "เล่น / เล่นซ้ำ (แตะ หรือกด Space)", en: "Play / Replay (tap, or press Space)", ja: "再生 / もう一度（タップ、または Space）" },
   pHint: { th: "ใช้<b>คีย์บอร์ด</b>: กด <b>F</b>=เลือกซ้าย, <b>J</b>=เลือกขวา, <b>Space</b>=เล่น/เล่นซ้ำ &nbsp;·&nbsp; ใช้<b>มือถือ/แท็บเล็ต</b>: <b>แตะกล่องฝั่งที่ชอบเพื่อเลือกได้เลย</b> ไม่ต้องกดอะไรเพิ่ม, แตะปุ่มเล่นเพื่อฟังซ้ำ &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "On a <b>keyboard</b>: press <b>F</b>=choose left, <b>J</b>=choose right, <b>Space</b>=play/replay &nbsp;·&nbsp; On <b>mobile/tablet</b>: <b>tap the box you prefer to choose it directly</b>, no extra tap needed, tap the Play button to replay &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>キーボード</b>: <b>F</b>キー=左を選択、<b>J</b>キー=右を選択、<b>Space</b>キー=再生/もう一度 &nbsp;·&nbsp; <b>モバイル/タブレット</b>: <b>好きな方のボックスをタップすればそのまま選択されます</b>、追加の操作は不要です。再生ボタンのタップでもう一度再生 &nbsp;·&nbsp; 両方再生後のみ選択できます" },
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
+  doneTitleSaving: { th: "กำลังบันทึกคำตอบ...", en: "Saving your answers...", ja: "回答を保存しています…" },
+  doneTitleFailed: { th: "ยังบันทึกไม่สำเร็จ — กรุณารีเฟรชหน้านี้", en: "Not saved yet — please refresh this page", ja: "まだ保存されていません — このページを更新してください" },
   doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
   doneBodySaving: { th: "กำลังบันทึกคำตอบขึ้นระบบ... กรุณาอย่าเพิ่งปิดหน้านี้หรือล็อกหน้าจอ รอสักครู่", en: "Saving your answers... please don't close this page or lock your screen yet. This takes just a moment.", ja: "回答を保存しています… このページを閉じたり画面をロックしたりせず、少々お待ちください。" },
   fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the button below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
-  fallbackFailed: { th: "ลองส่งข้อมูลอัตโนมัติหลายครั้งแล้วยังไม่สำเร็จ (อินเทอร์เน็ตอาจมีปัญหา) ระบบจะยังคงลองส่งต่อไปเรื่อยๆ ในพื้นหลัง ไม่ต้องทำอะไรก็ได้ — ถ้าสะดวก สามารถช่วยกดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเพิ่มเติมได้ (ไม่บังคับ)", en: "Tried sending automatically several times, still unsuccessful (possible connection issue). It'll keep retrying quietly in the background, so you don't need to do anything - but if convenient, you're welcome to use the button below to download your data and send it to the researcher as a backup (optional).", ja: "自動送信を何度か試みましたが、まだ成功していません（通信エラーの可能性）。バックグラウンドで引き続き自動的に再試行しますので、特に何もしていただく必要はありません — もしよろしければ、下のボタンでデータをダウンロードし、研究者にバックアップとして送っていただくこともできます（任意）。" },
+  fallbackFailed: { th: "ลองส่งข้อมูลอัตโนมัติหลายครั้งแล้วยังไม่สำเร็จ (อินเทอร์เน็ตอาจมีปัญหา) — กรุณาอย่าปิดหน้านี้ ลองรีเฟรชหน้านี้อีกครั้ง (กด reload) ซึ่งมักช่วยให้ส่งสำเร็จได้ หรือถ้าสะดวก ช่วยกดปุ่มด้านล่างเพื่อโหลดไฟล์สำรองแล้วส่งให้ผู้วิจัยเพิ่มเติมได้ (ไม่บังคับ)", en: "Tried sending automatically several times, still unsuccessful (possible connection issue) - please don't close this page. Try refreshing this page (reload), which often helps it go through, or if convenient, use the button below to download a backup file and send it to the researcher (optional).", ja: "自動送信を何度か試みましたが、まだ成功していません（通信エラーの可能性）。このページを閉じずに、ページを更新（リロード）してみてください — それで送信できることが多いです。もしよろしければ、下のボタンでバックアップファイルをダウンロードし、研究者に送っていただくこともできます（任意）。" },
   fallbackRetrying: { th: "กำลังลองส่งข้อมูลอีกครั้งโดยอัตโนมัติ — ไม่ต้องทำอะไร แค่เปิดหน้านี้ทิ้งไว้สักครู่", en: "Retrying automatically - no action needed, just leave this page open for a moment.", ja: "自動的に再送信を試みています — 何もする必要はありません。このページを少しの間開いたままにしておいてください。" },
   lblComment: { th: "มีคู่ไหนที่รู้สึกเฉยๆ ไม่อยากเลือกเลยมั้ย เล่าได้ (ไม่บังคับ)", en: "Were there pairs where you felt neutral, not really wanting either? Tell us here (optional)", ja: "どちらも選びたくないと感じたペアはありましたか？よければ教えてください（任意）" },
   btnSubmitComment: { th: "ส่งความคิดเห็น", en: "Submit comment", ja: "コメントを送信" },
@@ -500,8 +502,14 @@ function applyLang(){
   document.getElementById("subRight").textContent = STR.subRight[lang];
   document.getElementById("btnStart").textContent = STR.btnStart[lang];
   document.getElementById("pHint").innerHTML = STR.pHint[lang];
-  document.getElementById("doneTitle").textContent = STR.doneTitle[lang];
-  document.getElementById("doneBody").textContent = STR.doneBody[lang];
+  // Skip while doneCard is already showing - finishStudy()'s flow owns
+  // these two texts once the participant reaches it (saving/saved/failed),
+  // and blindly resetting them here on a language toggle would overwrite a
+  // true "still saving, don't close" state back to the default "done" text.
+  if (doneCard.style.display === "none"){
+    document.getElementById("doneTitle").textContent = STR.doneTitle[lang];
+    document.getElementById("doneBody").textContent = STR.doneBody[lang];
+  }
   document.getElementById("lblComment").textContent = STR.lblComment[lang];
   document.getElementById("rateStepLabel").textContent = STR.rateStepLabel[lang];
   document.getElementById("rateUnit").textContent = STR.rateUnit[lang];
@@ -787,6 +795,7 @@ var trialNoticeEl = document.getElementById("trialNotice");
 var btnStart = document.getElementById("btnStart");
 var pairCard = document.getElementById("pairCard"), doneCard = document.getElementById("doneCard");
 var doneBodyEl = document.getElementById("doneBody");
+var doneTitleEl = document.getElementById("doneTitle");
 var progressCount = document.getElementById("progressCount"), progressPct = document.getElementById("progressPct"), barFill = document.getElementById("barFill");
 var canAnswer = false, rightEndedAt = null, pendingSide = null, pendingKeyDownAt = null, lastChoiceResult = null;
 var activeSources = [];
@@ -826,6 +835,13 @@ function finishStudy(){
   // before they completed - which is exactly what real test data showed
   // (ranking/sada_ratings missing entirely on two mobile test runs that the
   // participant insisted they'd fully completed).
+  // The TITLE matters just as much as the body text here: a big bold
+  // "All done - thank you" heading that appears unconditionally gets read
+  // and acted on by itself (close the page) - a participant who glances at
+  // the headline and leaves will never notice a smaller "saving..." caption
+  // underneath it. So the title itself now also starts in a non-final
+  // "saving" state and only becomes "All done" once actually confirmed.
+  doneTitleEl.textContent = STR.doneTitleSaving[lang];
   doneBodyEl.textContent = STR.doneBodySaving[lang];
   saveFinalRanking(finalRanking);
 }
@@ -1318,12 +1334,25 @@ function toCsv(cols, rows){
 async function submitToSheet(sheetName, cols, rows){
   if (!GAS_URL || !rows.length) return false;
   try{
-    var res = await fetch(GAS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ sheet: sheetName, columns: cols, rows: rows }),
-      keepalive: true
-    });
+    // A request that gets suspended mid-flight (mobile backgrounding, screen
+    // lock) can leave its fetch Promise neither resolved nor rejected
+    // indefinitely - with the in-flight guard in submitPendingComparisons/
+    // submitRankingIfReady/submitPendingRatings, that permanently blocks
+    // every future retry too, since they all just await the same stuck
+    // promise forever. An explicit timeout forces it to fail (and the
+    // in-flight guard to clear) instead of hanging the retry loop forever.
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
+    var res;
+    try{
+      res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ sheet: sheetName, columns: cols, rows: rows }),
+        keepalive: true,
+        signal: controller.signal
+      });
+    } finally { clearTimeout(timeoutId); }
     // Apps Script Web Apps return HTTP 200 even when doPost's own try/catch
     // caught an internal error (e.g. a transient sheet-lock conflict from a
     // concurrent request) and sent back {ok:false} - res.ok alone can't tell
@@ -1432,10 +1461,15 @@ finishStudy = async function(){
     doneBodyEl.textContent = STR.fallbackPilot[lang];
     return;
   }
-  if (loadFinishedSubmitted()){ doneBodyEl.textContent = STR.doneBody[lang]; return; }
+  if (loadFinishedSubmitted()){
+    doneTitleEl.textContent = STR.doneTitle[lang];
+    doneBodyEl.textContent = STR.doneBody[lang];
+    return;
+  }
   var allOk = await attemptFinalSubmission();
   if (allOk){
     saveFinishedSubmitted();
+    doneTitleEl.textContent = STR.doneTitle[lang];
     doneBodyEl.textContent = STR.doneBody[lang];
     return;
   }
@@ -1444,7 +1478,10 @@ finishStudy = async function(){
   // a 15-20 minute survey. Show a reassuring "retrying automatically, don't
   // worry about it" message with no buttons, and only surface the manual
   // download option, clearly marked optional, if several automatic retries
-  // in a row still haven't gotten through.
+  // in a row still haven't gotten through. The title stays in its
+  // non-final "saving" state through this whole stretch - it only
+  // escalates to doneTitleFailed (explicitly says "not saved yet, please
+  // refresh") once retries have had a real chance and still failed.
   var retryAttempts = 0;
   var RETRIES_BEFORE_SHOWING_FALLBACK = 3;
   doneBodyEl.textContent = STR.fallbackRetrying[lang];
@@ -1455,6 +1492,7 @@ finishStudy = async function(){
         clearInterval(finishRetryInterval);
         finishRetryInterval = null;
         saveFinishedSubmitted();
+        doneTitleEl.textContent = STR.doneTitle[lang];
         doneBodyEl.textContent = STR.doneBody[lang];
         fallback.style.display = "none"; fallbackHint.style.display = "none";
         return;
@@ -1463,6 +1501,7 @@ finishStudy = async function(){
       if (retryAttempts >= RETRIES_BEFORE_SHOWING_FALLBACK){
         fallback.style.display = ""; fallbackHint.style.display = "block";
         fallbackHint.textContent = STR.fallbackFailed[lang];
+        doneTitleEl.textContent = STR.doneTitleFailed[lang];
         doneBodyEl.textContent = STR.fallbackFailed[lang];
       }
     }, 20000);
