@@ -328,9 +328,9 @@ var STR = {
   commentSent: { th: "ขอบคุณสำหรับความคิดเห็น", en: "Thanks for the comment", ja: "コメントをありがとうございます" },
   rateStepLabel: { th: "ขั้นที่ 2 — ให้คะแนนเสียงนี้ทีละเสียง (ไม่เทียบคู่แล้ว)", en: "Step 2 — rate this sound on its own (no more pairs)", ja: "ステップ2 — この音を単独で評価してください（比較はもう終わりです）" },
   rateUnit: { th: "เสียง", en: "sounds", ja: "音" },
-  rateSub: { th: "เสียงนี้", en: "this sound", ja: "この音" },
+  rateSub: { th: "เล่นเสียงนี้ซ้ำ — กด Space (คอมพิวเตอร์) หรือแตะ/คลิกที่นี่", en: "Replay this sound - press Space (computer) or tap/click here", ja: "この音をもう一度再生 — Spaceキー（パソコン）またはここをタップ/クリック" },
   btnRateNext: { th: "ถัดไป", en: "Next", ja: "次へ" },
-  rateHint: { th: "ฟังก่อนอย่างน้อย 1 ครั้ง (แตะกล่อง หรือกด Space) แล้วให้คะแนนครบทุกข้อ ถึงจะกด \"ถัดไป\" ได้", en: "Listen at least once (tap the box, or press Space), then rate every item before \"Next\" unlocks", ja: "少なくとも1回再生してから（ボックスをタップ、または Space）、すべての項目を評価すると「次へ」が押せます" },
+  rateHint: { th: "เสียงจะเล่นให้อัตโนมัติ ฟังซ้ำได้โดยแตะกล่อง หรือกด Space แล้วให้คะแนนครบทุกข้อ ถึงจะกด \"ถัดไป\" ได้", en: "The sound plays automatically. Replay it by tapping the box or pressing Space, then rate every item before \"Next\" unlocks.", ja: "音声は自動的に再生されます。ボックスをタップするか Space キーでもう一度再生できます。すべての項目を評価すると「次へ」が押せます。" },
   rateEndLow: { th: "ไม่เลย", en: "Not at all", ja: "全くそう思わない" },
   rateEndHigh: { th: "มากที่สุด", en: "Very much", ja: "非常にそう思う" },
   practiceNotice: {
@@ -917,6 +917,9 @@ function setupRating(){
   // the top of the rating card so the new sound/progress count is visible
   // immediately instead of requiring them to discover it.
   rateCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Auto-play the new sound instead of requiring a tap first - the box
+  // below is now for REPLAYING it, not for triggering the first play.
+  playSingle();
 }
 
 function startRatingPhase(){
@@ -937,7 +940,7 @@ function startRatingPhase(){
 }
 
 rateSlot.addEventListener("click", function(){ playSingle(); });
-rateSlot.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); playSingle(); } });
+rateSlot.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.code === "Space"){ e.preventDefault(); playSingle(); } });
 
 btnRateNext.addEventListener("click", function(){
   if (btnRateNext.disabled) return;
@@ -1128,7 +1131,11 @@ document.addEventListener("keydown", function(e){
     pendingKeyDownAt = now;
     pendingSide = e.code === "KeyF" ? "left" : "right";
     choose(pendingSide, rightEndedAt != null ? now - rightEndedAt : null);
-  } else if (e.code === "Space"){
+  } else if (e.code === "Space" && !ratingPhaseActive){
+    // Gated to the pairwise phase only - without this check, pressing Space
+    // during the rating phase also replayed the last pairwise pair (stale
+    // pendingLeftId/pendingRightId) on top of rateSlot's own Space handler
+    // playing the current rating sound, overlapping two unrelated clips.
     e.preventDefault();
     playCurrentPair();
   }
