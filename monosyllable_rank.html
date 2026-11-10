@@ -1176,13 +1176,31 @@ var SUBMITTED_KEY = "mono_rank_submitted_v1_" + GROUP + "_" + COND;
 function loadSubmittedCount(){ return parseInt(localStorage.getItem(SUBMITTED_KEY) || "0", 10) || 0; }
 function saveSubmittedCount(n){ localStorage.setItem(SUBMITTED_KEY, String(n)); }
 var submittedCount = loadSubmittedCount();
-async function submitPendingComparisons(){
-  if (!GAS_URL) return true;
-  if (results.length <= submittedCount) return true;
-  var pending = results.slice(submittedCount);
-  var ok = await submitToSheet("comparisons", COMPARISON_COLS, pending);
-  if (ok){ submittedCount = results.length; saveSubmittedCount(submittedCount); }
-  return ok;
+// These submitPending*/submitIfReady functions are called from several
+// places (periodic triggers, visibilitychange, pagehide, crash recovery) -
+// two calls can easily overlap (e.g. a participant clicks Next right as the
+// tab backgrounds). Without an in-flight guard, a second call starts before
+// the first has awaited its fetch and updated submittedCount/the sent flag,
+// so both read the same stale "nothing new since here" cursor, both send
+// the same rows, and the count/flag only accounts for one of them - the
+// cause of the duplicate rows found in testing. Concurrent callers now
+// share the one in-flight request instead of racing a second one.
+var submitPendingComparisonsInFlight = null;
+function submitPendingComparisons(){
+  if (submitPendingComparisonsInFlight) return submitPendingComparisonsInFlight;
+  submitPendingComparisonsInFlight = (async function(){
+    try {
+      if (!GAS_URL) return true;
+      if (results.length <= submittedCount) return true;
+      var pending = results.slice(submittedCount);
+      var ok = await submitToSheet("comparisons", COMPARISON_COLS, pending);
+      if (ok){ submittedCount = results.length; saveSubmittedCount(submittedCount); }
+      return ok;
+    } finally {
+      submitPendingComparisonsInFlight = null;
+    }
+  })();
+  return submitPendingComparisonsInFlight;
 }
 document.addEventListener("visibilitychange", function(){
   if (document.visibilityState === "hidden"){
@@ -1217,11 +1235,20 @@ function rankingRows(){
 var RANKING_SENT_KEY = "mono_rank_ranking_sent_v1_" + GROUP + "_" + COND;
 function loadRankingSent(){ return localStorage.getItem(RANKING_SENT_KEY) === "1"; }
 function saveRankingSent(){ localStorage.setItem(RANKING_SENT_KEY, "1"); }
-async function submitRankingIfReady(){
-  if (!GAS_URL || !finalRanking || loadRankingSent()) return true;
-  var ok = await submitToSheet("ranking", RANKING_COLS, rankingRows());
-  if (ok) saveRankingSent();
-  return ok;
+var submitRankingInFlight = null;
+function submitRankingIfReady(){
+  if (submitRankingInFlight) return submitRankingInFlight;
+  submitRankingInFlight = (async function(){
+    try {
+      if (!GAS_URL || !finalRanking || loadRankingSent()) return true;
+      var ok = await submitToSheet("ranking", RANKING_COLS, rankingRows());
+      if (ok) saveRankingSent();
+      return ok;
+    } finally {
+      submitRankingInFlight = null;
+    }
+  })();
+  return submitRankingInFlight;
 }
 
 // Ratings accumulate one at a time like comparisons, so the same
@@ -1233,13 +1260,22 @@ var RATING_SUBMITTED_KEY = "mono_rank_rating_submitted_v1_" + GROUP + "_" + COND
 function loadRatingSubmittedCount(){ return parseInt(localStorage.getItem(RATING_SUBMITTED_KEY) || "0", 10) || 0; }
 function saveRatingSubmittedCount(n){ localStorage.setItem(RATING_SUBMITTED_KEY, String(n)); }
 var ratingSubmittedCount = loadRatingSubmittedCount();
-async function submitPendingRatings(){
-  if (!GAS_URL) return true;
-  if (ratings.length <= ratingSubmittedCount) return true;
-  var pending = ratings.slice(ratingSubmittedCount);
-  var ok = await submitToSheet("sada_ratings", RATING_COLS, pending);
-  if (ok){ ratingSubmittedCount = ratings.length; saveRatingSubmittedCount(ratingSubmittedCount); }
-  return ok;
+var submitPendingRatingsInFlight = null;
+function submitPendingRatings(){
+  if (submitPendingRatingsInFlight) return submitPendingRatingsInFlight;
+  submitPendingRatingsInFlight = (async function(){
+    try {
+      if (!GAS_URL) return true;
+      if (ratings.length <= ratingSubmittedCount) return true;
+      var pending = ratings.slice(ratingSubmittedCount);
+      var ok = await submitToSheet("sada_ratings", RATING_COLS, pending);
+      if (ok){ ratingSubmittedCount = ratings.length; saveRatingSubmittedCount(ratingSubmittedCount); }
+      return ok;
+    } finally {
+      submitPendingRatingsInFlight = null;
+    }
+  })();
+  return submitPendingRatingsInFlight;
 }
 function toCsv(cols, rows){
   var lines = [cols.join(",")];
