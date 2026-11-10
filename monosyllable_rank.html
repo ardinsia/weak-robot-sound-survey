@@ -321,6 +321,7 @@ var STR = {
   pHint: { th: "ใช้<b>คีย์บอร์ด</b>: กด <b>F</b>=เลือกซ้าย, <b>J</b>=เลือกขวา, <b>Space</b>=เล่น/เล่นซ้ำ &nbsp;·&nbsp; ใช้<b>มือถือ/แท็บเล็ต</b>: <b>แตะกล่องฝั่งที่ชอบเพื่อเลือกได้เลย</b> ไม่ต้องกดอะไรเพิ่ม, แตะปุ่มเล่นเพื่อฟังซ้ำ &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "On a <b>keyboard</b>: press <b>F</b>=choose left, <b>J</b>=choose right, <b>Space</b>=play/replay &nbsp;·&nbsp; On <b>mobile/tablet</b>: <b>tap the box you prefer to choose it directly</b>, no extra tap needed, tap the Play button to replay &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>キーボード</b>: <b>F</b>キー=左を選択、<b>J</b>キー=右を選択、<b>Space</b>キー=再生/もう一度 &nbsp;·&nbsp; <b>モバイル/タブレット</b>: <b>好きな方のボックスをタップすればそのまま選択されます</b>、追加の操作は不要です。再生ボタンのタップでもう一度再生 &nbsp;·&nbsp; 両方再生後のみ選択できます" },
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
   doneBody: { th: "คำตอบถูกบันทึกแล้ว คุณสามารถปิดหน้านี้ได้", en: "Your answers have been saved. You may close this page.", ja: "回答は保存されました。このページを閉じて構いません。" },
+  doneBodySaving: { th: "กำลังบันทึกคำตอบขึ้นระบบ... กรุณาอย่าเพิ่งปิดหน้านี้หรือล็อกหน้าจอ รอสักครู่", en: "Saving your answers... please don't close this page or lock your screen yet. This takes just a moment.", ja: "回答を保存しています… このページを閉じたり画面をロックしたりせず、少々お待ちください。" },
   fallbackPilot: { th: "ยังไม่ได้ตั้งค่าระบบส่งอัตโนมัติ — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยเอง", en: "Automatic submission isn't set up yet - use the buttons below to download your data and send it to the researcher.", ja: "自動送信が未設定です — 下のボタンでデータをダウンロードし、研究者に送ってください。" },
   fallbackFailed: { th: "ส่งข้อมูลอัตโนมัติไม่สำเร็จ (อินเทอร์เน็ตอาจมีปัญหา) — กดปุ่มด้านล่างเพื่อโหลดไฟล์แล้วส่งให้ผู้วิจัยแทน", en: "Automatic submission failed (possible connection issue) - use the buttons below to download your data and send it to the researcher instead.", ja: "自動送信に失敗しました（通信エラーの可能性）— 下のボタンでデータをダウンロードし、研究者に送ってください。" },
   lblComment: { th: "มีคู่ไหนที่รู้สึกเฉยๆ ไม่อยากเลือกเลยมั้ย เล่าได้ (ไม่บังคับ)", en: "Were there pairs where you felt neutral, not really wanting either? Tell us here (optional)", ja: "どちらも選びたくないと感じたペアはありましたか？よければ教えてください（任意）" },
@@ -786,6 +787,7 @@ var slotLeft = document.getElementById("slotLeft"), slotRight = document.getElem
 var trialNoticeEl = document.getElementById("trialNotice");
 var btnStart = document.getElementById("btnStart");
 var pairCard = document.getElementById("pairCard"), doneCard = document.getElementById("doneCard");
+var doneBodyEl = document.getElementById("doneBody");
 var progressCount = document.getElementById("progressCount"), progressPct = document.getElementById("progressPct"), barFill = document.getElementById("barFill");
 var canAnswer = false, rightEndedAt = null, pendingSide = null, pendingKeyDownAt = null, lastChoiceResult = null;
 var activeSources = [];
@@ -815,6 +817,17 @@ function finishStudy(){
   pairCard.style.display = "none";
   rateCard.style.display = "none";
   doneCard.style.display = "block";
+  // Shown immediately, before any submission has even started - the
+  // override below swaps this to the real "saved, safe to close" message
+  // only once the sends actually succeed. Previously this screen claimed
+  // "your answers have been saved, you may close this page" the instant it
+  // appeared, which was false: the actual network sends hadn't started yet.
+  // On mobile especially, participants reasonably locked their screen or
+  // closed the tab right after seeing that, killing the pending requests
+  // before they completed - which is exactly what real test data showed
+  // (ranking/sada_ratings missing entirely on two mobile test runs that the
+  // participant insisted they'd fully completed).
+  doneBodyEl.textContent = STR.doneBodySaving[lang];
   saveFinalRanking(finalRanking);
 }
 
@@ -1357,17 +1370,21 @@ finishStudy = async function(){
   if (!GAS_URL){
     fallback.style.display = ""; fallbackHint.style.display = "block";
     fallbackHint.textContent = STR.fallbackPilot[lang];
+    doneBodyEl.textContent = STR.fallbackPilot[lang];
     return;
   }
-  if (loadFinishedSubmitted()) return;
+  if (loadFinishedSubmitted()){ doneBodyEl.textContent = STR.doneBody[lang]; return; }
   var ok1 = await submitPendingComparisons();
   var ok2 = await submitRankingIfReady();
   var ok3 = await submitPendingRatings();
   var ok4 = catchResults.length ? await submitToSheet("catch_trial", CATCH_COLS, catchResults) : true;
-  if (ok1 && ok2 && ok3 && ok4){ saveFinishedSubmitted(); }
-  if (!ok1 || !ok2 || !ok3 || !ok4){
+  if (ok1 && ok2 && ok3 && ok4){
+    saveFinishedSubmitted();
+    doneBodyEl.textContent = STR.doneBody[lang];
+  } else {
     fallback.style.display = ""; fallbackHint.style.display = "block";
     fallbackHint.textContent = STR.fallbackFailed[lang];
+    doneBodyEl.textContent = STR.fallbackFailed[lang];
   }
 };
 
