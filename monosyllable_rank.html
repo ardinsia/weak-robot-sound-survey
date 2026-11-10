@@ -114,16 +114,30 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
         <option value="na" data-th="ไม่ระบุ" data-en="Prefer not to say" data-ja="回答しない">ไม่ระบุ</option>
       </select>
     </div>
-    <div class="demo-row">
-      <label id="lblPet">เคยเลี้ยงสัตว์มั้ย</label>
-      <select class="demo-sel" id="demoPet">
-        <option value="" data-th="— เลือก —" data-en="— Select —" data-ja="— 選択 —">— เลือก —</option>
-        <option value="none" data-th="ไม่เคย" data-en="None" data-ja="なし">ไม่เคย</option>
-        <option value="dog" data-th="สุนัข" data-en="Dog" data-ja="犬">สุนัข</option>
-        <option value="cat" data-th="แมว" data-en="Cat" data-ja="猫">แมว</option>
-        <option value="small" data-th="สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)" data-en="Small animal (rabbit, guinea pig, hamster…)" data-ja="小動物（ウサギ、モルモット、ハムスターなど）">สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)</option>
-        <option value="other" data-th="อื่นๆ" data-en="Other" data-ja="その他">อื่นๆ</option>
-      </select>
+    <div class="demo-row" style="flex-direction:column;align-items:stretch;gap:6px">
+      <label id="lblPet">เคยเลี้ยงสัตว์มั้ย (เลือกได้มากกว่า 1 ข้อ)</label>
+      <div id="petCheckboxes" style="display:flex;flex-direction:column;gap:6px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input type="checkbox" class="pet-chk" data-val="none">
+          <span data-th="ไม่เคย" data-en="None" data-ja="なし">ไม่เคย</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input type="checkbox" class="pet-chk" data-val="dog">
+          <span data-th="สุนัข" data-en="Dog" data-ja="犬">สุนัข</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input type="checkbox" class="pet-chk" data-val="cat">
+          <span data-th="แมว" data-en="Cat" data-ja="猫">แมว</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input type="checkbox" class="pet-chk" data-val="small">
+          <span data-th="สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)" data-en="Small animal (rabbit, guinea pig, hamster…)" data-ja="小動物（ウサギ、モルモット、ハムスターなど）">สัตว์เล็ก (กระต่าย หนูแกสบี้ แฮมสเตอร์ ฯลฯ)</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input type="checkbox" class="pet-chk" data-val="other">
+          <span data-th="อื่นๆ" data-en="Other" data-ja="その他">อื่นๆ</span>
+        </label>
+      </div>
     </div>
     <div class="demo-row" id="rowPetOther" style="display:none">
       <label id="lblPetOther">ระบุ (ไม่บังคับ)</label>
@@ -282,7 +296,7 @@ var STR = {
   demoTitle: { th: "ก่อนเริ่ม — ข้อมูลทั่วไป (ไม่เก็บชื่อ อีเมล หรือสัญชาติ)", en: "Before you start — a few general questions (no name, email, or nationality collected)", ja: "開始前に — 一般的な質問です（氏名・メール・国籍は収集しません）" },
   lblAge: { th: "อายุ (ปี)", en: "Age (years)", ja: "年齢" },
   lblGender: { th: "เพศ", en: "Gender", ja: "性別" },
-  lblPet: { th: "เคยเลี้ยงสัตว์มั้ย", en: "Ever kept a pet?", ja: "ペットを飼ったことがありますか？" },
+  lblPet: { th: "เคยเลี้ยงสัตว์มั้ย (เลือกได้มากกว่า 1 ข้อ)", en: "Ever kept a pet? (select all that apply)", ja: "ペットを飼ったことがありますか？（複数選択可）" },
   lblPetOther: { th: "ระบุ (ไม่บังคับ)", en: "Please specify (optional)", ja: "具体的に（任意）" },
   demoAgePlaceholder: { th: "เช่น 24", en: "e.g. 24", ja: "例：24" },
   lblHearing: { th: "มีปัญหาการได้ยินที่ทราบมั้ย", en: "Known hearing difficulty?", ja: "聴覚に関して自覚している困難はありますか？" },
@@ -490,7 +504,7 @@ function applyLang(){
   if (typeof renderRateItems === "function" && ratingPhaseActive) renderRateItems();
   if (typeof updateTrialNotice === "function") updateTrialNotice();
   document.getElementById("btnSubmitComment").textContent = STR.btnSubmitComment[lang];
-  document.querySelectorAll("#demoCard option, #demoCard select option").forEach(function(opt){
+  document.querySelectorAll("#demoCard option, #demoCard select option, #demoCard [data-th]").forEach(function(opt){
     if (opt.dataset[lang] != null) opt.textContent = opt.dataset[lang];
   });
 }
@@ -534,16 +548,31 @@ function saveDemo(d){ localStorage.setItem(DEMO_KEY, JSON.stringify(d)); }
 var demoCard = document.getElementById("demoCard");
 var mainArea = document.getElementById("mainArea");
 var demoAge = document.getElementById("demoAge"), demoGender = document.getElementById("demoGender");
-var demoPet = document.getElementById("demoPet"), demoHearing = document.getElementById("demoHearing");
+var demoHearing = document.getElementById("demoHearing");
 var demoDevice = document.getElementById("demoDevice");
+var petChecks = Array.prototype.slice.call(document.querySelectorAll(".pet-chk"));
 var demoPetOther = document.getElementById("demoPetOther"), rowPetOther = document.getElementById("rowPetOther");
 var demoHint = document.getElementById("demoHint");
 var soundCheckConfirm = document.getElementById("soundCheckConfirm");
 
 function showMainArea(){ demoCard.style.display = "none"; mainArea.style.display = ""; }
 
-demoPet.addEventListener("change", function(){
-  rowPetOther.style.display = demoPet.value === "other" ? "" : "none";
+function getPetValues(){
+  return petChecks.filter(function(c){ return c.checked; }).map(function(c){ return c.dataset.val; });
+}
+
+// "None" is mutually exclusive with every other pet type (can't have "never
+// had a pet" AND "had a cat"); every other checkbox can combine freely, since
+// someone may have owned a cat, a rabbit, and a guinea pig all at once.
+petChecks.forEach(function(chk){
+  chk.addEventListener("change", function(){
+    if (chk.dataset.val === "none"){
+      if (chk.checked) petChecks.forEach(function(c){ if (c !== chk) c.checked = false; });
+    } else if (chk.checked){
+      petChecks.forEach(function(c){ if (c.dataset.val === "none") c.checked = false; });
+    }
+    rowPetOther.style.display = getPetValues().indexOf("other") !== -1 ? "" : "none";
+  });
 });
 
 // Sound check: a short synthesized tone (no audio file needed) so a
@@ -563,7 +592,7 @@ document.getElementById("btnSoundCheck").addEventListener("click", function(){
 
 document.getElementById("btnDemoContinue").addEventListener("click", function(){
   var age = parseInt(demoAge.value, 10);
-  var d = { age: (age >= 10 && age <= 100) ? age : "", gender: demoGender.value, pet: demoPet.value, pet_other: demoPetOther.value.trim(), hearing: demoHearing.value, device: demoDevice.value, group: GROUP };
+  var d = { age: (age >= 10 && age <= 100) ? age : "", gender: demoGender.value, pet: getPetValues().join(","), pet_other: demoPetOther.value.trim(), hearing: demoHearing.value, device: demoDevice.value, group: GROUP };
   if (!d.age || !d.gender || !d.pet || !d.hearing || !d.device || !soundCheckConfirm.checked){
     demoHint.style.color = "var(--accent)";
     demoHint.textContent = STR.demoHint[lang];
@@ -1235,10 +1264,12 @@ var existingDemo = loadDemo();
 applyLang();
 if (existingDemo){
   demoAge.value = existingDemo.age || ""; demoGender.value = existingDemo.gender || "";
-  demoPet.value = existingDemo.pet || ""; demoHearing.value = existingDemo.hearing || "";
+  var existingPets = (existingDemo.pet || "").split(",");
+  petChecks.forEach(function(c){ c.checked = existingPets.indexOf(c.dataset.val) !== -1; });
+  demoHearing.value = existingDemo.hearing || "";
   demoDevice.value = existingDemo.device || "";
   demoPetOther.value = existingDemo.pet_other || "";
-  rowPetOther.style.display = existingDemo.pet === "other" ? "" : "none";
+  rowPetOther.style.display = existingPets.indexOf("other") !== -1 ? "" : "none";
 }
 if (existingConsent){
   consentCard.style.display = "none";
