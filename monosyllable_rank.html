@@ -542,15 +542,30 @@ consentCheckbox.addEventListener("change", function(){
   btnConsentContinue.disabled = !consentCheckbox.checked;
 });
 
+// consent_log used to be sent once, fire-and-forget, with nothing to retry
+// it if that single fetch failed - found from real test data (JA LINE
+// in-app browser test, pid aqWs5SMBMy) where every other sheet
+// (comparisons/ranking/ratings/catch_trial/comments) landed perfectly but
+// consent_log had zero rows for that session. consentLogRow/consentLogOk
+// let the same end-of-session retry sweep that already covers
+// ranking/ratings/catch_trial also cover this.
+var consentLogRow = null, consentLogOk = false;
+function trySendConsentLog(){
+  if (!GAS_URL || !consentLogRow || consentLogOk) return Promise.resolve(true);
+  return submitToSheet("consent_log", CONSENT_COLS, [consentLogRow]).then(function(ok){
+    consentLogOk = !!ok;
+    return consentLogOk;
+  });
+}
+
 btnConsentContinue.addEventListener("click", function(){
   if (!consentCheckbox.checked) return;
   saveConsent();
   // Server-side audit trail: localStorage alone only proves consent
   // indirectly (via later rows existing for this pid) and never leaves the
   // participant's own browser, so also log the acceptance itself.
-  if (GAS_URL) submitToSheet("consent_log", CONSENT_COLS, [{
-    pid: PID, group: GROUP, cond: COND, device_info: DEVICE_INFO, consented_at: new Date().toISOString()
-  }]);
+  consentLogRow = { pid: PID, group: GROUP, cond: COND, device_info: DEVICE_INFO, consented_at: new Date().toISOString() };
+  trySendConsentLog();
   consentCard.style.display = "none";
   if (loadDemo()){ showMainArea(); } else { demoCard.style.display = ""; }
 });
@@ -1449,7 +1464,8 @@ async function attemptFinalSubmission(){
   var ok2 = await submitRankingIfReady();
   var ok3 = await submitPendingRatings();
   var ok4 = catchResults.length ? await submitToSheet("catch_trial", CATCH_COLS, catchResults) : true;
-  return ok1 && ok2 && ok3 && ok4;
+  var ok5 = await trySendConsentLog();
+  return ok1 && ok2 && ok3 && ok4 && ok5;
 }
 finishStudy = async function(){
   origFinish();
