@@ -36,7 +36,10 @@ p.lede{color:var(--muted);font-size:14.5px;margin:6px 0 20px;max-width:62ch}
 .scenario{font-size:13.5px;color:var(--muted);font-style:italic;margin-bottom:4px}
 .question{font-size:18px;font-weight:600;text-align:center;margin:10px 0 20px}
 .stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-.slot{border:2px solid var(--border);border-radius:16px;padding:22px 10px;text-align:center;transition:border-color .15s,background .15s,transform .1s;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.slot{position:relative;border:2px solid var(--border);border-radius:16px;padding:22px 10px;text-align:center;transition:border-color .15s,background .15s,transform .1s;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.replay-single{position:absolute;top:8px;right:10px;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--card);font-family:"EB Garamond",Georgia,serif;font-size:14px;font-weight:600;line-height:1;cursor:pointer;color:var(--muted);-webkit-tap-highlight-color:transparent}
+.replay-single:active{transform:scale(.92)}
+.replay-single.playing{border-color:var(--accent);color:var(--accent)}
 .slot.disabled{cursor:default;opacity:.55}
 .slot:active:not(.disabled){transform:scale(.97)}
 .ratebox{border:2px solid var(--border);border-radius:16px;padding:20px 14px;text-align:center;margin-bottom:14px;transition:border-color .15s,background .15s;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -191,10 +194,12 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
 
       <div class="stage">
         <div class="slot f disabled" id="slotLeft" role="button" tabindex="0" aria-label="left">
+          <button type="button" class="replay-single" id="btnReplayLeft" aria-label="replay left only" title="ฟังเฉพาะเสียงซ้าย (R)">R</button>
           <div class="key">F</div>
           <div class="sub" id="subLeft">ซ้าย</div>
         </div>
         <div class="slot j disabled" id="slotRight" role="button" tabindex="0" aria-label="right">
+          <button type="button" class="replay-single" id="btnReplayRight" aria-label="replay right only" title="ฟังเฉพาะเสียงขวา (I)">I</button>
           <div class="key">J</div>
           <div class="sub" id="subRight">ขวา</div>
         </div>
@@ -203,7 +208,7 @@ button.ctl:disabled{opacity:.4;cursor:not-allowed}
       <div class="controls">
         <button class="ctl primary" id="btnStart">เล่น / เล่นซ้ำ (แตะ หรือกด Space)</button>
       </div>
-      <p class="hint" id="pHint">กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น</p>
+      <p class="hint" id="pHint">กด <b>F</b> = เลือกซ้าย &nbsp;·&nbsp; กด <b>J</b> = เลือกขวา &nbsp;·&nbsp; กด <b>R</b> = ฟังเฉพาะซ้าย &nbsp;·&nbsp; กด <b>I</b> = ฟังเฉพาะขวา &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น</p>
     </div>
 
     <div class="card" id="rateCard" style="display:none">
@@ -316,7 +321,7 @@ var STR = {
   subLeft: { th: "ซ้าย", en: "left", ja: "左" },
   subRight: { th: "ขวา", en: "right", ja: "右" },
   btnStart: { th: "เล่น / เล่นซ้ำ (แตะ หรือกด Space)", en: "Play / Replay (tap, or press Space)", ja: "再生 / もう一度（タップ、または Space）" },
-  pHint: { th: "ใช้<b>คีย์บอร์ด</b>: กด <b>F</b>=เลือกซ้าย, <b>J</b>=เลือกขวา, <b>Space</b>=เล่น/เล่นซ้ำ &nbsp;·&nbsp; ใช้<b>มือถือ/แท็บเล็ต</b>: <b>แตะกล่องฝั่งที่ชอบเพื่อเลือกได้เลย</b> ไม่ต้องกดอะไรเพิ่ม, แตะปุ่มเล่นเพื่อฟังซ้ำ &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "On a <b>keyboard</b>: press <b>F</b>=choose left, <b>J</b>=choose right, <b>Space</b>=play/replay &nbsp;·&nbsp; On <b>mobile/tablet</b>: <b>tap the box you prefer to choose it directly</b>, no extra tap needed, tap the Play button to replay &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>キーボード</b>: <b>F</b>キー=左を選択、<b>J</b>キー=右を選択、<b>Space</b>キー=再生/もう一度 &nbsp;·&nbsp; <b>モバイル/タブレット</b>: <b>好きな方のボックスをタップすればそのまま選択されます</b>、追加の操作は不要です。再生ボタンのタップでもう一度再生 &nbsp;·&nbsp; 両方再生後のみ選択できます" },
+  pHint: { th: "ใช้<b>คีย์บอร์ด</b>: กด <b>F</b>=เลือกซ้าย, <b>J</b>=เลือกขวา, <b>R</b>=ฟังเฉพาะซ้าย, <b>I</b>=ฟังเฉพาะขวา, <b>Space</b>=เล่น/เล่นซ้ำทั้งคู่ &nbsp;·&nbsp; ใช้<b>มือถือ/แท็บเล็ต</b>: <b>แตะกล่องฝั่งที่ชอบเพื่อเลือกได้เลย</b> ไม่ต้องกดอะไรเพิ่ม, แตะปุ่มวงกลม R/I มุมบนเพื่อฟังทีละฝั่ง &nbsp;·&nbsp; เลือกได้หลังฟังครบทั้งคู่เท่านั้น", en: "On a <b>keyboard</b>: press <b>F</b>=choose left, <b>J</b>=choose right, <b>R</b>=replay left only, <b>I</b>=replay right only, <b>Space</b>=play/replay both &nbsp;·&nbsp; On <b>mobile/tablet</b>: <b>tap the box you prefer to choose it directly</b>, no extra tap needed, tap the small round R/I button in the corner to hear just one side &nbsp;·&nbsp; you can answer only after both have played", ja: "<b>キーボード</b>: <b>F</b>キー=左を選択、<b>J</b>キー=右を選択、<b>R</b>キー=左だけ再生、<b>I</b>キー=右だけ再生、<b>Space</b>キー=両方を再生/もう一度 &nbsp;·&nbsp; <b>モバイル/タブレット</b>: <b>好きな方のボックスをタップすればそのまま選択されます</b>、追加の操作は不要です。角の丸いR/Iボタンで片方だけ再生できます &nbsp;·&nbsp; 両方再生後のみ選択できます" },
   doneTitle: { th: "เสร็จสิ้นแล้ว — ขอบคุณ", en: "All done — thank you", ja: "完了しました — ありがとうございます" },
   doneTitleSaving: { th: "กำลังบันทึกคำตอบ...", en: "Saving your answers...", ja: "回答を保存しています…" },
   doneTitleFailed: { th: "ยังบันทึกไม่สำเร็จ — กรุณารีเฟรชหน้านี้", en: "Not saved yet — please refresh this page", ja: "まだ保存されていません — このページを更新してください" },
@@ -1146,6 +1151,32 @@ function choose(side, rtMs){
   }, 450);
 }
 
+// Replay just one side's sound on demand, independent of the normal
+// left-then-right sequence and of canAnswer - a participant asking to hear
+// only F or only J again isn't answering, so this must never toggle
+// chosen/disabled state or touch results/trialIdx.
+var btnReplayLeft = document.getElementById("btnReplayLeft"), btnReplayRight = document.getElementById("btnReplayRight");
+function playSingleSide(side){
+  var id = side === "left" ? window.__pairLeftId : window.__pairRightId;
+  if (id == null) return;
+  stopActiveSources();
+  clearAudioError();
+  var slot = side === "left" ? slotLeft : slotRight;
+  var btn = side === "left" ? btnReplayLeft : btnReplayRight;
+  loadBuffer(src(id)).then(function(buf){
+    var ctx = ensureCtx();
+    var s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination);
+    s.start(ctx.currentTime + 0.03);
+    activeSources = [s];
+    slot.classList.add("playing"); btn.classList.add("playing");
+    setTimeout(function(){ slot.classList.remove("playing"); btn.classList.remove("playing"); }, buf.duration * 1000 + 30);
+  }).catch(function(err){ showAudioError(err); });
+}
+// stopPropagation so tapping R/I doesn't bubble up to the slot's own click
+// handler (tapChoose), which would otherwise register it as an answer.
+btnReplayLeft.addEventListener("click", function(e){ e.stopPropagation(); playSingleSide("left"); });
+btnReplayRight.addEventListener("click", function(e){ e.stopPropagation(); playSingleSide("right"); });
+
 // Tap-to-choose, for phones (no F/J keyboard). Keyboard still works too.
 function tapChoose(side){
   if (!canAnswer) return;
@@ -1181,6 +1212,13 @@ document.addEventListener("keydown", function(e){
     // playing the current rating sound, overlapping two unrelated clips.
     e.preventDefault();
     playCurrentPair();
+  } else if ((e.code === "KeyR" || e.code === "KeyI") && !ratingPhaseActive){
+    // R sits directly above F on a QWERTY layout, I directly above J - same
+    // physical-position mnemonic as the F/J choice keys. Not gated on
+    // canAnswer: previewing one side again isn't answering, so it should
+    // work even before both sounds have finished their first playthrough.
+    e.preventDefault();
+    playSingleSide(e.code === "KeyR" ? "left" : "right");
   }
 });
 document.addEventListener("keyup", function(e){
